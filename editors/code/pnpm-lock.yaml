@@ -14,9 +14,9 @@ importers:
       '@types/vscode':
         specifier: 1.86.0
         version: 1.86.0
-      vscode-test:
+      '@vscode/test-electron':
         specifier: ^1.3.0
-        version: 1.6.1
+        version: 1.6.2
 
 packages:
 
@@ -29,6 +29,10 @@ packages:
 
   '@types/vscode@1.86.0':
     resolution: {integrity: sha512-DnIXf2ftWv+9LWOB5OJeIeaLigLHF7fdXF6atfc7X5g2w/wVZBgk0amP7b+ub5xAuW1q7qP5YcFvOcit/DtyCQ==}
+
+  '@vscode/test-electron@1.6.2':
+    resolution: {integrity: sha512-W01ajJEMx6223Y7J5yaajGjVs1QfW3YGkkOJHVKfAMEqNB1ZHN9wCcViehv5ZwVSSJnjhu6lYEYgwBdHtCxqhQ==}
+    engines: {node: '>=8.9.3'}
 
   agent-base@6.0.2:
     resolution: {integrity: sha512-RZNwNclF7+MS/8bDg70amg32dyeZGZxiDuQmZxKLAlQjr3jGyLx+4Kkk58UO7D2QdgFIQCovuSuZESne6RG6XQ==}
@@ -172,11 +176,6 @@ packages:
   util-deprecate@1.0.2:
     resolution: {integrity: sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==}
 
-  vscode-test@1.6.1:
-    resolution: {integrity: sha512-086q88T2ca1k95mUzffvbzb7esqQNvJgiwY4h29ukPhFo8u+vXOOmelUoU5EQUHs3Of8+JuQ3oGdbVCqaxuTXA==}
-    engines: {node: '>=8.9.3'}
-    deprecated: This package has been renamed to @vscode/test-electron, please update to the new name
-
   wrappy@1.0.2:
     resolution: {integrity: sha512-l4Sp/DRseor9wL6EvV2+TuQn63dMkPjZ/sp9XkghTEbV9KlPS1xUsZ3u7/IQO4wxtcFB4bgpQPRcR3QCvezPcQ==}
 
@@ -189,6 +188,15 @@ snapshots:
       undici-types: 5.26.5
 
   '@types/vscode@1.86.0': {}
+
+  '@vscode/test-electron@1.6.2':
+    dependencies:
+      http-proxy-agent: 4.0.1
+      https-proxy-agent: 5.0.1
+      rimraf: 3.0.2
+      unzipper: 0.10.14
+    transitivePeerDependencies:
+      - supports-color
 
   agent-base@6.0.2:
     dependencies:
@@ -342,14 +350,5 @@ snapshots:
       setimmediate: 1.0.5
 
   util-deprecate@1.0.2: {}
-
-  vscode-test@1.6.1:
-    dependencies:
-      http-proxy-agent: 4.0.1
-      https-proxy-agent: 5.0.1
-      rimraf: 3.0.2
-      unzipper: 0.10.14
-    transitivePeerDependencies:
-      - supports-color
 
   wrappy@1.0.2: {}

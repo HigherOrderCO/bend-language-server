@@ -5,6 +5,7 @@
     "version": "0.1.0",
     "categories": [],
     "keywords": [
+      "bend",
       "language-server",
       "tower-lsp"
     ],
@@ -16,21 +17,21 @@
     },
     "enabledApiProposals": [],
     "activationEvents": [
-      "onLanguage:nrs"
+      "onLanguage:bend"
     ],
     "main": "./dist/extension.js",
     "contributes": {
       "languages": [
         {
-          "id": "nrs",
+          "id": "bend",
           "extensions": [
-            ".nrs"
+            ".bend"
           ]
         }
       ],
       "configuration": {
         "type": "object",
-        "title": "nrs-language-server",
+        "title": "bend-language-server",
         "properties": {
           "nrs-language-server.trace.server": {
             "type": "string",
