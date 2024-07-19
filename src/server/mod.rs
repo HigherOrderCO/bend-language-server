@@ -1,10 +1,12 @@
+use std::fs;
+
 use bend::diagnostics::Diagnostic;
 use dashmap::DashMap;
 use tower_lsp::jsonrpc::Result;
 use tower_lsp::lsp_types as lsp;
 use tower_lsp::{Client, LanguageServer};
 
-use crate::core::document;
+use crate::core::document::{self, Document};
 
 pub struct Backend {
     /// Connection to the client, used to send data
@@ -47,7 +49,7 @@ impl LanguageServer for Backend {
         // self.pub
 
         self.client
-            .log_message(lsp::MessageType::INFO, "server initialized!")
+            .log_message(lsp::MessageType::INFO, "Bend Language Server initialized!")
             .await;
     }
 
@@ -58,6 +60,23 @@ impl LanguageServer for Backend {
     async fn did_open(&self, params: lsp::DidOpenTextDocumentParams) {
         // This is called when the client opens a new document.
         // We get the entire text of the document; let's store it.
+        log::info!("opening file at {:?}", params.text_document.uri);
+
+        self.open_doc(params.text_document.uri.clone(), params.text_document.text);
+        self.publish_diagnostics(&params.text_document.uri).await;
+    }
+
+    async fn did_change(&self, params: lsp::DidChangeTextDocumentParams) {
+        self.update_document(&params.text_document.uri, |doc| {
+            for event in &params.content_changes {
+                doc.update_whole_text(&event.text);
+            }
+        });
+    }
+
+    async fn did_save(&self, _params: lsp::DidSaveTextDocumentParams) {
+        // Called when document is saved.
+        // Update diagnostics (when we have them!)
     }
 
     async fn completion(
@@ -81,6 +100,13 @@ impl LanguageServer for Backend {
 }
 
 impl Backend {
+    pub fn new(client: Client) -> Self {
+        Self {
+            client,
+            open_docs: DashMap::new(),
+        }
+    }
+
     fn capabilities() -> lsp::ServerCapabilities {
         lsp::ServerCapabilities {
             text_document_sync: Some(lsp::TextDocumentSyncCapability::Options(
@@ -117,11 +143,36 @@ impl Backend {
         // todo!()
     }
 
+    /// Update the document at `url` using function `updater`.
+    fn update_document<F>(&self, url: &lsp::Url, mut updater: F)
+    where
+        F: FnMut(&mut Document),
+    {
+        self.open_docs
+            .get_mut(url)
+            .map(|mut refer| updater(refer.value_mut()));
+    }
+
     /// Read the contents of `url` using function `reader`.
     fn read_document<F, T>(&self, url: &lsp::Url, reader: F) -> Option<T>
     where
         F: Fn(&document::Document) -> Option<T>,
     {
-        self.open_docs.get(url).and_then(|val| reader(val.value()))
+        self.open_docs
+            .get(url)
+            .and_then(|refer| reader(refer.value()))
+    }
+
+    /// Open a new document at `url` with its contents as a parameter.
+    fn open_doc(&self, url: lsp::Url, text: String) {
+        self.open_docs
+            .insert(url.clone(), Document::new_with_text(url, &text));
+    }
+
+    /// Open a new document at `url` with its contents from the file system.
+    fn open_doc_from_path(&self, url: lsp::Url) {
+        if let Ok(text) = fs::read_to_string(url.to_file_path().unwrap()) {
+            self.open_doc(url, text);
+        }
     }
 }

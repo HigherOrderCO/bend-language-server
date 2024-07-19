@@ -81,7 +81,7 @@ import {
     };
   
     // Create the language client and start the client.
-    client = new LanguageClient("bend-lsp", "Bend language server", serverOptions, clientOptions);
+    client = new LanguageClient("bend-lsp", "Bend Language Server", serverOptions, clientOptions);
     // activateInlayHints(context);
     client.start();
   }

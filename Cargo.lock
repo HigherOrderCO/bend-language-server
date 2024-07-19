@@ -188,9 +188,9 @@ checksum = "a12916984aab3fa6e39d655a33e09c0071eb36d6ab3aea5c2d78551f1df6d952"
 
 [[package]]
 name = "cc"
-version = "1.1.5"
+version = "1.1.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "324c74f2155653c90b04f25b2a47a8a631360cb908f92a772695f430c7e31052"
+checksum = "2aba8f4e9906c7ce3c73463f62a7f0c65183ada1a2d47e397cc8810827f9694f"
 
 [[package]]
 name = "cfg-if"
@@ -594,9 +594,9 @@ checksum = "3fdb12b2476b595f9358c5161aa467c2438859caa136dec86c26fdd2efe17b92"
 
 [[package]]
 name = "parking_lot"
-version = "0.12.2"
+version = "0.12.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7e4af0ca4f6caed20e900d564c242b8e5d4903fdacf31d3daf527b66fe6f42fb"
+checksum = "f1bf18183cf54e8d6059647fc3063646a1801cf30896933ec2311622cc4b9a27"
 dependencies = [
  "lock_api",
  "parking_lot_core",
@@ -1004,7 +1004,7 @@ dependencies = [
 [[package]]
 name = "tree-sitter-bend"
 version = "0.2.36"
-source = "git+https://github.com/HigherOrderCO/tree-sitter-bend.git#7378b339a383c321e2a20c584f806ea7ccae5f7c"
+source = "git+https://github.com/HigherOrderCO/tree-sitter-bend.git#aaf96bf2cb5cbbfd482ec5c0c13b4bb4bd03dc52"
 dependencies = [
  "cc",
  "tree-sitter",

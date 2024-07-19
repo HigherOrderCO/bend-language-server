@@ -24,10 +24,14 @@ impl Document {
 
     /// Create a new document with text for `url`.
     pub fn new_with_text(url: lsp::Url, text: &str) -> Self {
-        todo!()
+        let mut doc = Self::new(url);
+        doc.update_whole_text(text);
+        doc
     }
 
-    pub fn parse_whole_text(&mut self, text: &str) {
-        todo!()
+    /// Update the document with entirely new text.
+    pub fn update_whole_text(&mut self, text: &str) {
+        self.text = text.to_string();
+        self.tree = self.parser.parse(text, None);
     }
 }
