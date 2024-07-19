@@ -52,7 +52,7 @@ import {
     context.subscriptions.push(disposable);
   
     const traceOutputChannel = window.createOutputChannel("Bend Language Server trace");
-    const command = process.env.SERVER_PATH || "bend-language-server";
+    const command = process.env.SERVER_PATH || "bend-lsp";
     const run: Executable = {
       command,
       options: {
@@ -81,7 +81,7 @@ import {
     };
   
     // Create the language client and start the client.
-    client = new LanguageClient("bend-language-server", "Bend language server", serverOptions, clientOptions);
+    client = new LanguageClient("bend-lsp", "Bend language server", serverOptions, clientOptions);
     // activateInlayHints(context);
     client.start();
   }

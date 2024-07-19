@@ -1,5 +1,5 @@
 {
-	"name": "bend-language-client",
+	"name": "bend-lang-client",
 	"description": "VSCode extension for the Bend Language Server",
 	"license": "MIT",
 	"version": "0.1.0",

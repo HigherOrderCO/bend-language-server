@@ -1,5 +1,5 @@
 {
-    "name": "bend-language-server",
+    "name": "bend-lsp",
     "description": "Language server for the Bend programming language",
     "license": "MIT",
     "version": "0.1.0",
