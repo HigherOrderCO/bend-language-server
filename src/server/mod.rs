@@ -1,12 +1,13 @@
 use std::fs;
 
-use bend::diagnostics::Diagnostic;
+// use bend::diagnostics::Diagnostic;
 use dashmap::DashMap;
 use tower_lsp::jsonrpc::Result;
 use tower_lsp::lsp_types as lsp;
 use tower_lsp::{Client, LanguageServer};
 
 use crate::core::document::{self, Document};
+use crate::utils::lsp_log;
 
 pub struct Backend {
     /// Connection to the client, used to send data
@@ -48,9 +49,7 @@ impl LanguageServer for Backend {
 
         // self.pub
 
-        self.client
-            .log_message(lsp::MessageType::INFO, "Bend Language Server initialized!")
-            .await;
+        lsp_log::info!(self.client, "bend-lsp initialized");
     }
 
     async fn shutdown(&self) -> Result<()> {
@@ -60,13 +59,19 @@ impl LanguageServer for Backend {
     async fn did_open(&self, params: lsp::DidOpenTextDocumentParams) {
         // This is called when the client opens a new document.
         // We get the entire text of the document; let's store it.
-        log::info!("opening file at {:?}", params.text_document.uri);
+        lsp_log::info!(self.client, "opening file at {}", params.text_document.uri);
 
         self.open_doc(params.text_document.uri.clone(), params.text_document.text);
         self.publish_diagnostics(&params.text_document.uri).await;
     }
 
     async fn did_change(&self, params: lsp::DidChangeTextDocumentParams) {
+        lsp_log::log!(
+            self.client,
+            "getting new text from {}",
+            params.text_document.uri
+        );
+
         self.update_document(&params.text_document.uri, |doc| {
             for event in &params.content_changes {
                 doc.update_whole_text(&event.text);
@@ -74,9 +79,14 @@ impl LanguageServer for Backend {
         });
     }
 
-    async fn did_save(&self, _params: lsp::DidSaveTextDocumentParams) {
+    async fn did_save(&self, params: lsp::DidSaveTextDocumentParams) {
         // Called when document is saved.
         // Update diagnostics (when we have them!)
+        lsp_log::log!(
+            self.client,
+            "document saved at {}",
+            params.text_document.uri
+        );
     }
 
     async fn completion(
@@ -85,7 +95,7 @@ impl LanguageServer for Backend {
     ) -> Result<Option<lsp::CompletionResponse>> {
         Ok(Some(lsp::CompletionResponse::Array(vec![
             lsp::CompletionItem::new_simple("Hello".to_string(), "Some detail".to_string()),
-            lsp::CompletionItem::new_simple("Bye".to_string(), "More detail".to_string()),
+            lsp::CompletionItem::new_simple("Bye/Bye".to_string(), "More detail".to_string()),
         ])))
     }
 
