@@ -1,33 +1,83 @@
+use std::collections::HashMap;
+
+use itertools::Itertools;
 use tower_lsp::lsp_types::{self as lsp, SemanticTokenType};
 use tree_sitter as ts;
 
 use crate::language::{bend, bend_parser, conversion};
 
-pub const LEGEND_TYPE: &[SemanticTokenType] = &[
-    SemanticTokenType::FUNCTION,
-    SemanticTokenType::VARIABLE,
-    SemanticTokenType::STRING,
-    SemanticTokenType::COMMENT,
-    SemanticTokenType::NUMBER,
-    SemanticTokenType::KEYWORD,
-    SemanticTokenType::OPERATOR,
-    SemanticTokenType::PARAMETER,
-];
+use super::document::Document;
 
-struct SemanticToken {
+lazy_static::lazy_static! {
+    static ref NAME_TO_TOKEN_TYPE: HashMap<&'static str, SemanticTokenType> = {
+        HashMap::from([
+            ("variable", SemanticTokenType::VARIABLE),
+            ("variable.parameter", SemanticTokenType::PARAMETER),
+            ("variable.member", SemanticTokenType::ENUM_MEMBER),
+            ("property", SemanticTokenType::PROPERTY),
+            ("keyword", SemanticTokenType::KEYWORD),
+            ("keyword.conditional", SemanticTokenType::KEYWORD),
+            ("keyword.function", SemanticTokenType::KEYWORD),
+            ("keyword.return", SemanticTokenType::KEYWORD),
+            ("keyword.repeat", SemanticTokenType::KEYWORD),
+            ("keyword.type", SemanticTokenType::KEYWORD),
+            ("string", SemanticTokenType::STRING),
+            ("function", SemanticTokenType::FUNCTION),
+            ("function.call", SemanticTokenType::FUNCTION),
+            ("type", SemanticTokenType::TYPE),
+            // ("constructor", SemanticTokenType::?),
+            ("character", SemanticTokenType::STRING),
+            ("character.special", SemanticTokenType::STRING),
+            ("number", SemanticTokenType::NUMBER),
+            ("number.float", SemanticTokenType::NUMBER),
+            ("comment", SemanticTokenType::COMMENT),
+            // ("punctuation", SemanticTokenType::?),
+            // ("punctuation.delimiter", SemanticTokenType::?),
+            // ("punctuation.bracket", SemanticTokenType::?),
+            ("operator", SemanticTokenType::OPERATOR),
+        ])
+    };
+
+    static ref LEGEND_TOKEN_TYPE: Vec<SemanticTokenType> =
+        NAME_TO_TOKEN_TYPE.values().map(|v| v.clone()).unique().collect();
+
+    static ref TOKEN_TYPE_INDEX: HashMap<SemanticTokenType, usize> =
+        LEGEND_TOKEN_TYPE.iter().enumerate().map(|(i, v)| (v.clone(), i)).collect();
+}
+
+// pub const LEGEND_TYPE: &[SemanticTokenType] = &[
+//     SemanticTokenType::FUNCTION,
+//     SemanticTokenType::VARIABLE,
+//     SemanticTokenType::STRING,
+//     SemanticTokenType::COMMENT,
+//     SemanticTokenType::NUMBER,
+//     SemanticTokenType::KEYWORD,
+//     SemanticTokenType::OPERATOR,
+//     SemanticTokenType::PARAMETER,
+// ];
+
+pub struct SemanticToken {
     pub range: conversion::Range,
     pub token_type: usize,
 }
 
-// pub fn semantic_tokens_from_tree(tree: ts::Tree) -> String /*Vec<SemanticToken>*/ {
-    // let query = ts::Query::new(&bend(), QUERY);
-    // query.unwrap().
-// }
+pub fn semantic_tokens(doc: Document) -> Vec<SemanticToken> {
+    let mut cursor = ts::QueryCursor::new();
+    let query = ts::Query::new(&bend(), QUERY).unwrap();
+    let names = query.capture_names();
+    let root = doc.tree.as_ref().unwrap().root_node();
+
+    for matche in cursor.matches(&query, root, doc.text.as_bytes()) {
+        for capture in matche.captures {
+            
+        }
+    }
+
+    todo!()
+}
 
 #[test]
 fn test() {
-    // this works!
-    
     let code = "main = (f \"hi!\")";
     let mut parser = bend_parser().unwrap();
     let tree = parser.parse(code, None).unwrap();

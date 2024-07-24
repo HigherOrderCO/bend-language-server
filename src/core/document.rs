@@ -5,9 +5,9 @@ use crate::language::bend_parser;
 
 pub struct Document {
     pub url: lsp::Url,
-    text: String,
-    tree: Option<ts::Tree>,
-    parser: ts::Parser,
+    pub text: String,
+    pub tree: Option<ts::Tree>,
+    pub parser: ts::Parser,
     // pub components: HashMap<String, ComponentInfo>
 }
 
