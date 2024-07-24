@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use itertools::Itertools;
-use tower_lsp::lsp_types::{self as lsp, SemanticTokenType};
+use tower_lsp::lsp_types::{SemanticToken, SemanticTokenType};
 use tree_sitter as ts;
 
 use crate::language::{bend, bend_parser, conversion};
@@ -9,7 +9,7 @@ use crate::language::{bend, bend_parser, conversion};
 use super::document::Document;
 
 lazy_static::lazy_static! {
-    static ref NAME_TO_TOKEN_TYPE: HashMap<&'static str, SemanticTokenType> = {
+    pub static ref NAME_TO_TOKEN_TYPE: HashMap<&'static str, SemanticTokenType> = {
         HashMap::from([
             ("variable", SemanticTokenType::VARIABLE),
             ("variable.parameter", SemanticTokenType::PARAMETER),
@@ -38,10 +38,10 @@ lazy_static::lazy_static! {
         ])
     };
 
-    static ref LEGEND_TOKEN_TYPE: Vec<SemanticTokenType> =
+    pub static ref LEGEND_TOKEN_TYPE: Vec<SemanticTokenType> =
         NAME_TO_TOKEN_TYPE.values().map(|v| v.clone()).unique().collect();
 
-    static ref TOKEN_TYPE_INDEX: HashMap<SemanticTokenType, usize> =
+    pub static ref TOKEN_TYPE_INDEX: HashMap<SemanticTokenType, usize> =
         LEGEND_TOKEN_TYPE.iter().enumerate().map(|(i, v)| (v.clone(), i)).collect();
 }
 
@@ -56,40 +56,70 @@ lazy_static::lazy_static! {
 //     SemanticTokenType::PARAMETER,
 // ];
 
-pub struct SemanticToken {
-    pub range: conversion::Range,
-    pub token_type: usize,
-}
-
-pub fn semantic_tokens(doc: Document) -> Vec<SemanticToken> {
+pub fn semantic_tokens(doc: &Document) -> Vec<SemanticToken> {
     let mut cursor = ts::QueryCursor::new();
     let query = ts::Query::new(&bend(), QUERY).unwrap();
     let names = query.capture_names();
     let root = doc.tree.as_ref().unwrap().root_node();
 
-    for matche in cursor.matches(&query, root, doc.text.as_bytes()) {
+    let mut res = vec![];
+    for matche in cursor.matches(&query, root, &doc.text) {
         for capture in matche.captures {
-            
+            let maybe_idx = names
+                .get(capture.index as usize)
+                .and_then(|name| NAME_TO_TOKEN_TYPE.get(name))
+                .and_then(|typ| TOKEN_TYPE_INDEX.get(typ));
+
+            if let Some(&idx) = maybe_idx {
+                println!("Token: {:?}", doc.text.0.get_byte_slice(capture.node.byte_range()));
+
+                res.push(
+                    MySemanticToken {
+                        range: capture.node.range().into(),
+                        token_type: idx,
+                    }
+                    .into(),
+                );
+            }
         }
     }
 
-    todo!()
+    res
+}
+
+#[derive(Debug)]
+pub struct MySemanticToken {
+    pub range: conversion::Range,
+    pub token_type: usize,
+}
+
+impl From<MySemanticToken> for SemanticToken {
+    fn from(value: MySemanticToken) -> Self {
+        SemanticToken {
+            delta_line: todo!(),
+            delta_start: todo!(),
+            length: todo!(),
+            token_type: todo!(),
+            token_modifiers_bitset: todo!(),
+        }
+    }
 }
 
 #[test]
 fn test() {
-    let code = "main = (f \"hi!\")";
+    let code = crate::core::document::Rope("main = (f \"hi!\")".into());
     let mut parser = bend_parser().unwrap();
-    let tree = parser.parse(code, None).unwrap();
+    let tree = parser.parse(code.0.to_string(), None).unwrap();
 
     let query = ts::Query::new(&bend(), &QUERY).unwrap();
-    println!("{:?}", query.capture_names());
+    println!("{:?}\n", query.capture_names());
 
-    for qmatch in ts::QueryCursor::new().matches(&query, tree.root_node(), code.as_bytes()) {
+    for qmatch in ts::QueryCursor::new().matches(&query, tree.root_node(), &code) {
         for capture in qmatch.captures {
             println!("{:?}", capture);
+            let range = capture.node.byte_range();
+            println!("{:?}\n", code.0.slice(range));
         }
-        println!();
     }
 }
 

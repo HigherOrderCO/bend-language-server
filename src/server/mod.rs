@@ -7,6 +7,7 @@ use tower_lsp::lsp_types as lsp;
 use tower_lsp::{Client, LanguageServer};
 
 use crate::core::document::{self, Document};
+use crate::core::semantic_token;
 use crate::utils::lsp_log;
 
 pub struct Backend {
@@ -89,6 +90,21 @@ impl LanguageServer for Backend {
         );
     }
 
+    async fn semantic_tokens_full(
+        &self,
+        params: lsp::SemanticTokensParams,
+    ) -> Result<Option<lsp::SemanticTokensResult>> {
+        lsp_log::info!(self.client, "generating semantic tokens");
+
+        let uri = params.text_document.uri;
+        let semantic_tokens =
+            self.read_document(&uri, |doc| Some(semantic_token::semantic_tokens(doc)));
+
+        lsp_log::info!(self.client, "got tokens: {:?}", semantic_tokens);
+
+        Ok(None)
+    }
+
     async fn completion(
         &self,
         _: lsp::CompletionParams,
@@ -128,6 +144,31 @@ impl Backend {
                     save: Some(lsp::TextDocumentSyncSaveOptions::Supported(true)),
                 },
             )),
+            semantic_tokens_provider: Some(
+                lsp::SemanticTokensServerCapabilities::SemanticTokensRegistrationOptions(
+                    lsp::SemanticTokensRegistrationOptions {
+                        text_document_registration_options: {
+                            lsp::TextDocumentRegistrationOptions {
+                                document_selector: Some(vec![lsp::DocumentFilter {
+                                    language: Some("bend".into()),
+                                    scheme: Some("file".into()),
+                                    pattern: None,
+                                }]),
+                            }
+                        },
+                        semantic_tokens_options: lsp::SemanticTokensOptions {
+                            work_done_progress_options: lsp::WorkDoneProgressOptions::default(),
+                            legend: lsp::SemanticTokensLegend {
+                                token_types: semantic_token::LEGEND_TOKEN_TYPE.to_vec(),
+                                token_modifiers: vec![],
+                            },
+                            range: Some(false),
+                            full: Some(lsp::SemanticTokensFullOptions::Bool(true)),
+                        },
+                        static_registration_options: lsp::StaticRegistrationOptions::default(),
+                    },
+                ),
+            ),
             definition_provider: Some(lsp::OneOf::Left(true)),
             completion_provider: Some(lsp::CompletionOptions {
                 resolve_provider: Some(false),
