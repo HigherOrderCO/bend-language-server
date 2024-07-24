@@ -102,7 +102,12 @@ impl LanguageServer for Backend {
 
         lsp_log::info!(self.client, "got tokens: {:?}", semantic_tokens);
 
-        Ok(None)
+        Ok(semantic_tokens.map(|tokens| {
+            lsp::SemanticTokensResult::Tokens(lsp::SemanticTokens {
+                result_id: None,
+                data: tokens,
+            })
+        }))
     }
 
     async fn completion(
