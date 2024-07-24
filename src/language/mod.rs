@@ -1,3 +1,5 @@
+pub mod conversion;
+
 use tree_sitter::{Language, LanguageError, Parser};
 
 pub fn bend() -> Language {
