@@ -63,39 +63,117 @@ pub fn semantic_tokens(doc: &Document) -> Vec<SemanticToken> {
     let names = query.capture_names();
     let root = doc.tree.as_ref().unwrap().root_node();
 
-    let mut res = vec![];
-    for matche in cursor.matches(&query, root, &TextProviderRope(&doc.text)) {
-        for capture in matche.captures {
-            let maybe_idx = names
-                .get(capture.index as usize)
-                .and_then(|name| NAME_TO_TOKEN_TYPE.get(name))
-                .and_then(|typ| TOKEN_TYPE_INDEX.get(typ));
+    let mut pre_line = 0;
+    let mut pre_start = 0;
+    cursor
+        .matches(&query, root, &TextProviderRope(&doc.text))
+        .map(|matche| matche.captures)
+        .flatten()
+        .filter_map(|capture| {
+            let name = names.get(capture.index as usize)?;
+            let typ = NAME_TO_TOKEN_TYPE.get(name)?;
+            let token_type = *TOKEN_TYPE_INDEX.get(typ)?;
 
-            if let Some(&idx) = maybe_idx {
-                println!(
-                    "Token: {:?}",
-                    doc.text.get_byte_slice(capture.node.byte_range())
-                );
+            make_semantic_token(
+                &doc.text,
+                capture.node.byte_range(),
+                token_type as u32,
+                &mut pre_line,
+                &mut pre_start,
+            )
+        })
+        .collect()
+}
 
-                res.push(
-                    MySemanticToken {
-                        range: capture.node.range().into(),
-                        token_type: idx,
-                    }
-                    .into(),
-                );
-            }
-        }
-    }
+// pub fn semantic_tokens(doc: &Document) -> Vec<SemanticToken> {
+//     let mut cursor = ts::QueryCursor::new();
+//     let query = ts::Query::new(&bend(), QUERY).unwrap();
+//     let names = query.capture_names();
+//     let root = doc.tree.as_ref().unwrap().root_node();
 
-    res
+//     let mut res = vec![];
+//     let mut pre_line = 0;
+//     let mut pre_start = 0;
+//     for matche in cursor.matches(&query, root, &TextProviderRope(&doc.text)) {
+//         for capture in matche.captures {
+//             let maybe_idx = names
+//                 .get(capture.index as usize)
+//                 .and_then(|name| NAME_TO_TOKEN_TYPE.get(name))
+//                 .and_then(|typ| TOKEN_TYPE_INDEX.get(typ));
+
+//             if let Some(&idx) = maybe_idx {
+//                 if let Some(token) = make_semantic_token(
+//                     &doc.text,
+//                     capture.node.byte_range(),
+//                     idx as u32,
+//                     &mut pre_line,
+//                     &mut pre_start,
+//                 ) {
+//                     res.push(token);
+//                 }
+//             }
+//         }
+//     }
+
+//     res
+// }
+
+fn make_semantic_token(
+    code: &Rope,
+    range: std::ops::Range<usize>,
+    token_type: u32,
+    pre_line: &mut u32,
+    pre_start: &mut u32,
+) -> Option<SemanticToken> {
+    let line = code.try_byte_to_line(range.start).ok()? as u32;
+    let first = code.try_line_to_char(line as usize).ok()? as u32;
+    let start = code.try_byte_to_char(range.start).ok()? as u32 - first;
+    let delta_line = line - *pre_line;
+    let delta_start = if delta_line == 0 {
+        start - *pre_start
+    } else {
+        start
+    };
+
+    *pre_line = line;
+    *pre_start = start;
+
+    Some(SemanticToken {
+        delta_line,
+        delta_start,
+        length: (range.end - range.start) as u32,
+        token_type,
+        token_modifiers_bitset: 0,
+    })
 }
 
 #[derive(Debug)]
 pub struct MySemanticToken {
-    pub range: conversion::Range,
+    pub start: usize,
+    pub length: usize,
     pub token_type: usize,
 }
+
+// impl MySemanticToken {
+//     pub fn into_semantic_token(&self, rope: &Rope) -> Option<SemanticToken> {
+//         let line = rope.try_byte_to_line(self.start).ok()? as u32;
+//         let first = rope.try_line_to_char(line as usize).ok()? as u32;
+//         let start = rope.try_byte_to_char(self.start).ok()? as u32 - first;
+//         let delta_line = line - pre_line;
+//         let delta_start = if delta_line == 0 {
+//             start - pre_start
+//         } else {
+//             start
+//         };
+//         let ret = Some(SemanticToken {
+//             delta_line,
+//             delta_start,
+//             length: self.length as u32,
+//             token_type: self.token_type as u32,
+//             token_modifiers_bitset: 0,
+//         });
+//     }
+// }
 
 impl From<MySemanticToken> for SemanticToken {
     fn from(value: MySemanticToken) -> Self {

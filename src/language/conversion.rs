@@ -55,8 +55,8 @@ impl From<lsp::Position> for Point {
 /// Intermediate struct to convert between `ts::Range` and `lsp::Range`.
 #[derive(Clone, Debug, PartialEq, PartialOrd, Ord, Eq)]
 pub struct Range {
-    start: Point,
-    end: Point,
+    pub start: Point,
+    pub end: Point,
 }
 
 impl Range {
