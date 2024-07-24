@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
 use itertools::Itertools;
+use ropey::Rope;
 use tower_lsp::lsp_types::{SemanticToken, SemanticTokenType};
 use tree_sitter as ts;
 
@@ -63,7 +64,7 @@ pub fn semantic_tokens(doc: &Document) -> Vec<SemanticToken> {
     let root = doc.tree.as_ref().unwrap().root_node();
 
     let mut res = vec![];
-    for matche in cursor.matches(&query, root, &doc.text) {
+    for matche in cursor.matches(&query, root, &TextProviderRope(&doc.text)) {
         for capture in matche.captures {
             let maybe_idx = names
                 .get(capture.index as usize)
@@ -71,7 +72,10 @@ pub fn semantic_tokens(doc: &Document) -> Vec<SemanticToken> {
                 .and_then(|typ| TOKEN_TYPE_INDEX.get(typ));
 
             if let Some(&idx) = maybe_idx {
-                println!("Token: {:?}", doc.text.0.get_byte_slice(capture.node.byte_range()));
+                println!(
+                    "Token: {:?}",
+                    doc.text.get_byte_slice(capture.node.byte_range())
+                );
 
                 res.push(
                     MySemanticToken {
@@ -106,20 +110,40 @@ impl From<MySemanticToken> for SemanticToken {
 }
 
 #[test]
-fn test() {
-    let code = crate::core::document::Rope("main = (f \"hi!\")".into());
+fn token_capture_test() {
+    let code: Rope = "main = (f \"hi!\")".into();
     let mut parser = bend_parser().unwrap();
-    let tree = parser.parse(code.0.to_string(), None).unwrap();
+    let tree = parser.parse(code.to_string(), None).unwrap();
 
     let query = ts::Query::new(&bend(), &QUERY).unwrap();
     println!("{:?}\n", query.capture_names());
 
-    for qmatch in ts::QueryCursor::new().matches(&query, tree.root_node(), &code) {
+    for qmatch in ts::QueryCursor::new().matches(&query, tree.root_node(), &TextProviderRope(&code))
+    {
         for capture in qmatch.captures {
             println!("{:?}", capture);
             let range = capture.node.byte_range();
-            println!("{:?}\n", code.0.slice(range));
+            println!("{:?}\n", code.slice(range));
         }
+    }
+}
+
+pub struct TextProviderRope<'a>(pub &'a Rope);
+
+impl<'a> ts::TextProvider<&'a [u8]> for &'a TextProviderRope<'a> {
+    type I = ChunksBytes<'a>;
+    fn text(&mut self, node: tree_sitter::Node) -> Self::I {
+        ChunksBytes(self.0.byte_slice(node.byte_range()).chunks())
+    }
+}
+
+pub struct ChunksBytes<'a>(ropey::iter::Chunks<'a>);
+
+impl<'a> Iterator for ChunksBytes<'a> {
+    type Item = &'a [u8];
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.0.next().map(|s| s.as_bytes())
     }
 }
 
