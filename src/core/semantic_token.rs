@@ -4,6 +4,7 @@ use itertools::Itertools;
 use ropey::Rope;
 use tower_lsp::lsp_types::{SemanticToken, SemanticTokenType};
 use tree_sitter as ts;
+use tree_sitter_highlight::{HighlightConfiguration, HighlightEvent, Highlighter};
 
 use crate::language::{bend, bend_parser, conversion};
 
@@ -42,6 +43,9 @@ lazy_static::lazy_static! {
     pub static ref LEGEND_TOKEN_TYPE: Vec<SemanticTokenType> =
         NAME_TO_TOKEN_TYPE.values().map(|v| v.clone()).unique().collect();
 
+    pub static ref HIGHLIGHT_NAMES: Vec<&'static str> =
+        NAME_TO_TOKEN_TYPE.keys().map(|x| *x).collect();
+
     pub static ref NAME_TO_TYPE_INDEX: HashMap<&'static str, usize> = {
         let token_type_index: HashMap<_, _> = LEGEND_TOKEN_TYPE.iter().enumerate().map(|(i, v)| (v.clone(), i)).collect();
         NAME_TO_TOKEN_TYPE.iter().map(|(key, val)| (*key, token_type_index[val])).collect()
@@ -49,30 +53,43 @@ lazy_static::lazy_static! {
 }
 
 pub fn semantic_tokens(doc: &Document) -> Vec<SemanticToken> {
-    let mut cursor = ts::QueryCursor::new();
-    let query = ts::Query::new(&bend(), QUERY).unwrap();
-    let names = query.capture_names();
-    let root = doc.tree.as_ref().unwrap().root_node();
+    let mut highlighter = Highlighter::new();
+    let mut config = HighlightConfiguration::new(bend(), "bend", &QUERY, "", "").unwrap();
+    config.configure(&HIGHLIGHT_NAMES);
 
+    let text = doc.text.to_string(); // TODO: this is bad
+    let highlights = highlighter
+        .highlight(&config, text.as_bytes(), None, |_| None)
+        .unwrap();
+
+    let mut tokens = vec![];
+    let mut curr = None;
     let mut pre_line = 0;
     let mut pre_start = 0;
-    cursor
-        .matches(&query, root, &TextProviderRope(&doc.text))
-        .map(|matche| matche.captures)
-        .flatten()
-        .filter_map(|capture| {
-            let name = names.get(capture.index as usize)?;
-            let type_index = *NAME_TO_TYPE_INDEX.get(name)?;
+    for event in highlights {
+        match event {
+            // if the highlight is nested, only save inner range
+            Result::Ok(HighlightEvent::HighlightStart(h)) => curr = Some(h.0),
+            Result::Ok(HighlightEvent::HighlightEnd) => curr = None,
+            Result::Ok(HighlightEvent::Source { start, end }) => {
+                curr.and_then(|curr| HIGHLIGHT_NAMES.get(curr))
+                    .and_then(|name| NAME_TO_TYPE_INDEX.get(name))
+                    .and_then(|type_index| {
+                        make_semantic_token(
+                            &doc.text,
+                            start..end,
+                            *type_index as u32,
+                            &mut pre_line,
+                            &mut pre_start,
+                        )
+                    })
+                    .map(|token| tokens.push(token));
+            }
+            Err(_) => { /* log error? */ }
+        }
+    }
 
-            make_semantic_token(
-                &doc.text,
-                capture.node.byte_range(),
-                type_index as u32,
-                &mut pre_line,
-                &mut pre_start,
-            )
-        })
-        .collect()
+    tokens
 }
 
 fn make_semantic_token(
@@ -111,25 +128,44 @@ List/flatten (List/Cons x xs) = (List/concat x (List/flatten xs))
 List/flatten (List/Nil)       = (List/Nil)
 "#
     .into();
-    let mut parser = bend_parser().unwrap();
-    let tree = parser.parse(code.to_string(), None).unwrap();
+    let mut highlighter = Highlighter::new();
+    let mut config = HighlightConfiguration::new(bend(), "bend", &QUERY, "", "").unwrap();
+    config.configure(&HIGHLIGHT_NAMES);
 
-    let query = ts::Query::new(&bend(), &QUERY).unwrap();
-    let names = query.capture_names();
-    println!("{:?}\n", names);
+    let text = code.to_string(); // TODO: this is bad
+    let highlights = highlighter
+        .highlight(&config, text.as_bytes(), None, |_| None)
+        .unwrap();
 
-    for qmatch in ts::QueryCursor::new().matches(&query, tree.root_node(), &TextProviderRope(&code))
-    {
-        for capture in qmatch.captures {
-            println!("{:?}", capture);
-            let range = capture.node.byte_range();
-            println!(
-                "{:?}: {:?}\n",
-                code.slice(range),
-                names.get(capture.index as usize)
-            );
+    let mut result = vec![];
+
+    let mut curr = None;
+    for event in highlights {
+        match event.unwrap() {
+            HighlightEvent::HighlightStart(h) => {
+                curr = Some(h);
+                println!("start: {}", HIGHLIGHT_NAMES[h.0])
+            }
+            HighlightEvent::Source { start, end } => {
+                if let Some(curr) = curr {
+                    result.push((start..end, curr.0));
+                    println!("{start} - {end}: \"{}\"", &text[start..end])
+                }
+            }
+            HighlightEvent::HighlightEnd => {
+                curr = None;
+                println!("end")
+            }
         }
     }
+
+    println!(
+        "tokens: {:?}",
+        result
+            .into_iter()
+            .map(|(rg, idx)| (&text[rg], HIGHLIGHT_NAMES[idx]))
+            .collect_vec()
+    );
 }
 
 pub struct TextProviderRope<'a>(pub &'a Rope);
