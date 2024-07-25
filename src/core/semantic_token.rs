@@ -42,20 +42,11 @@ lazy_static::lazy_static! {
     pub static ref LEGEND_TOKEN_TYPE: Vec<SemanticTokenType> =
         NAME_TO_TOKEN_TYPE.values().map(|v| v.clone()).unique().collect();
 
-    pub static ref TOKEN_TYPE_INDEX: HashMap<SemanticTokenType, usize> =
-        LEGEND_TOKEN_TYPE.iter().enumerate().map(|(i, v)| (v.clone(), i)).collect();
+    pub static ref NAME_TO_TYPE_INDEX: HashMap<&'static str, usize> = {
+        let token_type_index: HashMap<_, _> = LEGEND_TOKEN_TYPE.iter().enumerate().map(|(i, v)| (v.clone(), i)).collect();
+        NAME_TO_TOKEN_TYPE.iter().map(|(key, val)| (*key, token_type_index[val])).collect()
+    };
 }
-
-// pub const LEGEND_TYPE: &[SemanticTokenType] = &[
-//     SemanticTokenType::FUNCTION,
-//     SemanticTokenType::VARIABLE,
-//     SemanticTokenType::STRING,
-//     SemanticTokenType::COMMENT,
-//     SemanticTokenType::NUMBER,
-//     SemanticTokenType::KEYWORD,
-//     SemanticTokenType::OPERATOR,
-//     SemanticTokenType::PARAMETER,
-// ];
 
 pub fn semantic_tokens(doc: &Document) -> Vec<SemanticToken> {
     let mut cursor = ts::QueryCursor::new();
@@ -71,52 +62,18 @@ pub fn semantic_tokens(doc: &Document) -> Vec<SemanticToken> {
         .flatten()
         .filter_map(|capture| {
             let name = names.get(capture.index as usize)?;
-            let typ = NAME_TO_TOKEN_TYPE.get(name)?;
-            let token_type = *TOKEN_TYPE_INDEX.get(typ)?;
+            let type_index = *NAME_TO_TYPE_INDEX.get(name)?;
 
             make_semantic_token(
                 &doc.text,
                 capture.node.byte_range(),
-                token_type as u32,
+                type_index as u32,
                 &mut pre_line,
                 &mut pre_start,
             )
         })
         .collect()
 }
-
-// pub fn semantic_tokens(doc: &Document) -> Vec<SemanticToken> {
-//     let mut cursor = ts::QueryCursor::new();
-//     let query = ts::Query::new(&bend(), QUERY).unwrap();
-//     let names = query.capture_names();
-//     let root = doc.tree.as_ref().unwrap().root_node();
-
-//     let mut res = vec![];
-//     let mut pre_line = 0;
-//     let mut pre_start = 0;
-//     for matche in cursor.matches(&query, root, &TextProviderRope(&doc.text)) {
-//         for capture in matche.captures {
-//             let maybe_idx = names
-//                 .get(capture.index as usize)
-//                 .and_then(|name| NAME_TO_TOKEN_TYPE.get(name))
-//                 .and_then(|typ| TOKEN_TYPE_INDEX.get(typ));
-
-//             if let Some(&idx) = maybe_idx {
-//                 if let Some(token) = make_semantic_token(
-//                     &doc.text,
-//                     capture.node.byte_range(),
-//                     idx as u32,
-//                     &mut pre_line,
-//                     &mut pre_start,
-//                 ) {
-//                     res.push(token);
-//                 }
-//             }
-//         }
-//     }
-
-//     res
-// }
 
 fn make_semantic_token(
     code: &Rope,
@@ -127,10 +84,10 @@ fn make_semantic_token(
 ) -> Option<SemanticToken> {
     let line = code.try_byte_to_line(range.start).ok()? as u32;
     let first = code.try_line_to_char(line as usize).ok()? as u32;
-    let start = code.try_byte_to_char(range.start).ok()? as u32 - first;
-    let delta_line = line - *pre_line;
+    let start = (code.try_byte_to_char(range.start).ok()? as u32).checked_sub(first)?;
+    let delta_line = line.checked_sub(*pre_line)?;
     let delta_start = if delta_line == 0 {
-        start - *pre_start
+        start.checked_sub(*pre_start)?
     } else {
         start
     };
@@ -147,61 +104,30 @@ fn make_semantic_token(
     })
 }
 
-#[derive(Debug)]
-pub struct MySemanticToken {
-    pub start: usize,
-    pub length: usize,
-    pub token_type: usize,
-}
-
-// impl MySemanticToken {
-//     pub fn into_semantic_token(&self, rope: &Rope) -> Option<SemanticToken> {
-//         let line = rope.try_byte_to_line(self.start).ok()? as u32;
-//         let first = rope.try_line_to_char(line as usize).ok()? as u32;
-//         let start = rope.try_byte_to_char(self.start).ok()? as u32 - first;
-//         let delta_line = line - pre_line;
-//         let delta_start = if delta_line == 0 {
-//             start - pre_start
-//         } else {
-//             start
-//         };
-//         let ret = Some(SemanticToken {
-//             delta_line,
-//             delta_start,
-//             length: self.length as u32,
-//             token_type: self.token_type as u32,
-//             token_modifiers_bitset: 0,
-//         });
-//     }
-// }
-
-impl From<MySemanticToken> for SemanticToken {
-    fn from(value: MySemanticToken) -> Self {
-        SemanticToken {
-            delta_line: todo!(),
-            delta_start: todo!(),
-            length: todo!(),
-            token_type: todo!(),
-            token_modifiers_bitset: todo!(),
-        }
-    }
-}
-
 #[test]
 fn token_capture_test() {
-    let code: Rope = "main = (f \"hi!\")".into();
+    let code: Rope = r#"
+List/flatten (List/Cons x xs) = (List/concat x (List/flatten xs))
+List/flatten (List/Nil)       = (List/Nil)
+"#
+    .into();
     let mut parser = bend_parser().unwrap();
     let tree = parser.parse(code.to_string(), None).unwrap();
 
     let query = ts::Query::new(&bend(), &QUERY).unwrap();
-    println!("{:?}\n", query.capture_names());
+    let names = query.capture_names();
+    println!("{:?}\n", names);
 
     for qmatch in ts::QueryCursor::new().matches(&query, tree.root_node(), &TextProviderRope(&code))
     {
         for capture in qmatch.captures {
             println!("{:?}", capture);
             let range = capture.node.byte_range();
-            println!("{:?}\n", code.slice(range));
+            println!(
+                "{:?}: {:?}\n",
+                code.slice(range),
+                names.get(capture.index as usize)
+            );
         }
     }
 }
