@@ -61,16 +61,16 @@ pub fn semantic_tokens(text: &Rope) -> Vec<SemanticToken> {
         .unwrap();
 
     let mut tokens = vec![];
-    let mut curr = None;
+    let mut typs = vec![];
     let mut pre_line = 0;
     let mut pre_start = 0;
     for event in highlights {
         match event {
-            // if the highlight is nested, only save inner range
-            Result::Ok(HighlightEvent::HighlightStart(h)) => curr = Some(h.0),
-            Result::Ok(HighlightEvent::HighlightEnd) => curr = None,
+            Result::Ok(HighlightEvent::HighlightStart(h)) => typs.push(h.0),
+            Result::Ok(HighlightEvent::HighlightEnd) => drop(typs.pop()),
             Result::Ok(HighlightEvent::Source { start, end }) => {
-                curr.and_then(|curr| HIGHLIGHT_NAMES.get(curr))
+                typs.last()
+                    .and_then(|curr| HIGHLIGHT_NAMES.get(*curr))
                     .and_then(|name| NAME_TO_TYPE_INDEX.get(name))
                     .and_then(|type_index| {
                         make_semantic_token(
@@ -160,16 +160,18 @@ List/flatten (List/Nil)       = (List/Nil)
         .unwrap();
 
     let mut tokens = vec![];
-    let mut curr = None;
+    let mut stack = vec![];
     let mut pre_line = 0;
     let mut pre_start = 0;
     for event in highlights {
         match event {
             // if the highlight is nested, only save inner range
-            Result::Ok(HighlightEvent::HighlightStart(h)) => curr = Some(h.0),
-            Result::Ok(HighlightEvent::HighlightEnd) => curr = None,
+            Result::Ok(HighlightEvent::HighlightStart(h)) => stack.push(h.0),
+            Result::Ok(HighlightEvent::HighlightEnd) => drop(stack.pop()),
             Result::Ok(HighlightEvent::Source { start, end }) => {
-                curr.and_then(|curr| HIGHLIGHT_NAMES.get(curr))
+                stack
+                    .last()
+                    .and_then(|curr| HIGHLIGHT_NAMES.get(*curr))
                     .and_then(|name| NAME_TO_TYPE_INDEX.get(name))
                     .and_then(|type_index| {
                         println!(
