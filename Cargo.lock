@@ -1059,7 +1059,7 @@ dependencies = [
 [[package]]
 name = "tree-sitter-bend"
 version = "0.2.36"
-source = "git+https://github.com/HigherOrderCO/tree-sitter-bend.git#595a9f75b9a63107e57c6cfb878b7f06b40d9f7d"
+source = "git+https://github.com/HigherOrderCO/tree-sitter-bend.git#a4742b28f5af1ae671a11cbf8d3884828ded32e6"
 dependencies = [
  "cc",
  "tree-sitter",
