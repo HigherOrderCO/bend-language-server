@@ -97,10 +97,12 @@ impl LanguageServer for Backend {
         lsp_log::info!(self.client, "generating semantic tokens");
 
         let uri = params.text_document.uri;
-        let semantic_tokens =
-            self.read_document(&uri, |doc| Some(semantic_token::semantic_tokens(&doc.text)));
+        let semantic_tokens = self.read_document_mut(&uri, |mut doc| {
+            Some(semantic_token::semantic_tokens(&mut doc))
+        });
 
-        lsp_log::info!(self.client, "got tokens: {:?}", semantic_tokens);
+        let token_amount = semantic_tokens.as_ref().map(|ts| ts.len()).unwrap_or(0);
+        lsp_log::info!(self.client, "got {} tokens", token_amount);
 
         Ok(semantic_tokens.map(|tokens| {
             lsp::SemanticTokensResult::Tokens(lsp::SemanticTokens {
@@ -217,6 +219,16 @@ impl Backend {
         self.open_docs
             .get(url)
             .and_then(|refer| reader(refer.value()))
+    }
+
+    /// Read the contents of `url` using function `reader`, possibly changing the document.
+    fn read_document_mut<F, T>(&self, url: &lsp::Url, mut updater: F) -> Option<T>
+    where
+        F: FnMut(&mut Document) -> Option<T>,
+    {
+        self.open_docs
+            .get_mut(url)
+            .and_then(|mut refer| updater(refer.value_mut()))
     }
 
     /// Open a new document at `url` with its contents as a parameter.

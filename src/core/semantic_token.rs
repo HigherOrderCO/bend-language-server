@@ -4,8 +4,9 @@ use itertools::Itertools;
 use ropey::Rope;
 use tower_lsp::lsp_types::{SemanticToken, SemanticTokenType};
 use tree_sitter as ts;
-use tree_sitter_highlight::{HighlightConfiguration, HighlightEvent, Highlighter};
+use tree_sitter_highlight::{HighlightConfiguration, HighlightEvent};
 
+use super::document::Document;
 use crate::language::bend;
 
 lazy_static::lazy_static! {
@@ -48,14 +49,21 @@ lazy_static::lazy_static! {
         let token_type_index: HashMap<_, _> = LEGEND_TOKEN_TYPE.iter().enumerate().map(|(i, v)| (v.clone(), i)).collect();
         NAME_TO_TOKEN_TYPE.iter().map(|(key, val)| (*key, token_type_index[val])).collect()
     };
+
+    pub static ref HIGHLIGHTER_CONFIG: HighlightConfiguration = {
+        let mut config = HighlightConfiguration::new(bend(), "bend", &QUERY, "", "").unwrap();
+        config.configure(&HIGHLIGHT_NAMES);
+        config
+    };
 }
 
-pub fn semantic_tokens(text: &Rope) -> Vec<SemanticToken> {
-    let mut highlighter = Highlighter::new();
-    let mut config = HighlightConfiguration::new(bend(), "bend", &QUERY, "", "").unwrap();
-    config.configure(&HIGHLIGHT_NAMES);
+pub fn semantic_tokens(doc: &mut Document) -> Vec<SemanticToken> {
+    // let mut highlighter = Highlighter::new();
+    // let mut config = HighlightConfiguration::new(bend(), "bend", &QUERY, "", "").unwrap();
+    // config.configure(&HIGHLIGHT_NAMES);
 
-    let code = text.to_string(); // TODO: this is bad
+    let code = doc.text.to_string(); // TODO: this is bad
+    let (highlighter, config) = &mut doc.highlighter;
     let highlights = highlighter
         .highlight(&config, code.as_bytes(), None, |_| None)
         .unwrap();
@@ -74,7 +82,7 @@ pub fn semantic_tokens(text: &Rope) -> Vec<SemanticToken> {
                     .and_then(|name| NAME_TO_TYPE_INDEX.get(name))
                     .and_then(|type_index| {
                         make_semantic_token(
-                            &text,
+                            &doc.text,
                             start..end,
                             *type_index as u32,
                             &mut pre_line,
@@ -128,7 +136,7 @@ List/flatten (List/Cons x xs) = (List/concat x (List/flatten xs))
 List/flatten (List/Nil)       = (List/Nil)
 "#
     .into();
-    let mut highlighter = Highlighter::new();
+    let mut highlighter = tree_sitter_highlight::Highlighter::new();
     let mut config = HighlightConfiguration::new(bend(), "bend", &QUERY, "", "").unwrap();
     config.configure(&HIGHLIGHT_NAMES);
 

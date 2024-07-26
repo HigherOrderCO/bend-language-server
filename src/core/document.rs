@@ -3,14 +3,18 @@ use std::{collections::btree_map::RangeMut, marker::PhantomData};
 use ropey::Rope;
 use tower_lsp::lsp_types as lsp;
 use tree_sitter as ts;
+use tree_sitter_highlight::{self as hg, Highlighter};
 
 use crate::language::bend_parser;
+
+use super::semantic_token::HIGHLIGHTER_CONFIG;
 
 pub struct Document {
     pub url: lsp::Url,
     pub text: Rope,
     pub tree: Option<ts::Tree>,
     pub parser: ts::Parser,
+    pub highlighter: (hg::Highlighter, &'static hg::HighlightConfiguration),
     // pub components: HashMap<String, ComponentInfo>
 }
 
@@ -22,6 +26,7 @@ impl Document {
             text: Rope::new(),
             tree: None,
             parser: bend_parser().unwrap(),
+            highlighter: (Highlighter::new(), &HIGHLIGHTER_CONFIG),
         }
     }
 
