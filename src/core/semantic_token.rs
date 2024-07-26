@@ -4,6 +4,7 @@ use itertools::Itertools;
 use ropey::Rope;
 use tower_lsp::lsp_types::{SemanticToken, SemanticTokenType};
 use tree_sitter as ts;
+use tree_sitter_bend::HIGHLIGHTS_QUERY;
 use tree_sitter_highlight::{HighlightConfiguration, HighlightEvent};
 
 use super::document::Document;
@@ -51,17 +52,13 @@ lazy_static::lazy_static! {
     };
 
     pub static ref HIGHLIGHTER_CONFIG: HighlightConfiguration = {
-        let mut config = HighlightConfiguration::new(bend(), "bend", &QUERY, "", "").unwrap();
+        let mut config = HighlightConfiguration::new(bend(), "bend", &HIGHLIGHTS_QUERY, "", "").unwrap();
         config.configure(&HIGHLIGHT_NAMES);
         config
     };
 }
 
 pub fn semantic_tokens(doc: &mut Document) -> Vec<SemanticToken> {
-    // let mut highlighter = Highlighter::new();
-    // let mut config = HighlightConfiguration::new(bend(), "bend", &QUERY, "", "").unwrap();
-    // config.configure(&HIGHLIGHT_NAMES);
-
     let code = doc.text.to_string(); // TODO: this is bad
     let (highlighter, config) = &mut doc.highlighter;
     let highlights = highlighter
@@ -137,8 +134,7 @@ List/flatten (List/Nil)       = (List/Nil)
 "#
     .into();
     let mut highlighter = tree_sitter_highlight::Highlighter::new();
-    let mut config = HighlightConfiguration::new(bend(), "bend", &QUERY, "", "").unwrap();
-    config.configure(&HIGHLIGHT_NAMES);
+    let config = &HIGHLIGHTER_CONFIG;
 
     let text = code.to_string(); // TODO: this is bad
     let highlights = highlighter
@@ -154,7 +150,7 @@ List/flatten (List/Nil)       = (List/Nil)
                 println!("> start {}", name);
             }
             HighlightEvent::Source { start, end } => {
-                println!("> {start}-{end}: `{:?}`", &text[start..end])
+                println!("> {start}-{end}: {:?}", &text[start..end])
             }
             HighlightEvent::HighlightEnd => {
                 println!("> end {}", stack.pop().unwrap());
@@ -183,7 +179,7 @@ List/flatten (List/Nil)       = (List/Nil)
                     .and_then(|name| NAME_TO_TYPE_INDEX.get(name))
                     .and_then(|type_index| {
                         println!(
-                            "{}-{} `{}`: {}",
+                            "{}-{} {:?}: {}",
                             start,
                             end,
                             &text[start..end],
@@ -222,185 +218,3 @@ impl<'a> Iterator for ChunksBytes<'a> {
         self.0.next().map(|s| s.as_bytes())
     }
 }
-
-const QUERY: &'static str = r#"
-(identifier) @variable
-
-; TODO: lots of repetitive queries because of this, how can we fix it?
-(identifier
-  (path) @property
-  name: (_) @variable)
-
-(import_name
-  "import" @keyword
-  (os_path) @string)
-
-(import_from
-  "from" @keyword
-  (os_path) @string
-  "import" @keyword
-  (os_path) @string)
-
-(fun_function_definition
-  name: (identifier) @function)
-(fun_function_definition
-  name: (identifier (identifier) @function))
-
-(imp_function_definition
-  name: (identifier) @function)
-(imp_function_definition
-  name: (identifier (identifier) @function))
-(parameters) @variable.parameter
-
-(object_definition
-  name: (identifier) @type)
-(object_definition
-  name: (identifier (identifier) @type))
-(object_field
-  (identifier) @variable.member)
-(object_field
-  (identifier (identifier) @variable.member))
-
-(imp_type_definition
-  name: (identifier) @type)
-(imp_type_definition
-  name: (identifier (identifier) @type))
-(imp_type_constructor
-  (identifier) @constructor)
-(imp_type_constructor
-  (identifier (identifier) @constructor))
-(imp_type_constructor_field
-  (identifier) @variable.member)
-(imp_type_constructor_field
-  (identifier (identifier) @variable.member))
-
-(fun_type_definition
-  name: (identifier) @type)
-(fun_type_definition
-  name: (identifier (identifier) @type))
-(fun_type_constructor
-  (identifier) @constructor)
-(fun_type_constructor
-  (identifier (identifier) @constructor))
-(fun_type_constructor_fields
-  (identifier) @variable.member)
-(fun_type_constructor_fields
-  (identifier (identifier) @variable.member))
-
-(hvm_definition
-  name: (identifier) @function)
-(hvm_definition
-  name: (identifier (identifier) @function))
-(hvm_definition
-  code: (hvm_code) @string)
-
-(constructor
-  (identifier) @constructor)
-(constructor
-  (identifier (identifier) @constructor))
-(constructor
-  field: (identifier) @property)
-
-(call_expression
-  (identifier) @function.call)
-(call_expression
-  (identifier (identifier) @function.call))
-
-(switch_case
-  (switch_pattern) @character.special
-  (#eq? @character.special "_"))
-
-(integer) @number
-(float) @number.float
-
-(character) @character
-(comment) @comment
-[
- (symbol)
- (string)
-] @string
-
-[
-  ":"
-  ","
-  ";"
-] @punctuation.delimiter
-
-[
-  "["
-  "]"
-  "("
-  ")"
-  "{"
-  "}"
-] @punctuation.bracket
-
-[
-  "-"
-  "-="
-  "!="
-  "*"
-  "**"
-  "*="
-  "/"
-  "/="
-  "&"
-  "%"
-  "^"
-  "+"
-  "+="
-  "<"
-  "<="
-  "="
-  "=="
-  ">"
-  ">="
-  "|"
-  "~"
-  "&"
-  "<-"
-  "&="
-  "|="
-  "^="
-  "@="
-] @operator
-
-[
-  "if"
-  "elif"
-  "else"
-] @keyword.conditional
-
-
-[
- "def"
-  "@"
-  "λ"
-  "lambda"
-  "hvm"
-] @keyword.function
-
-"return" @keyword.return
-"for" @keyword.repeat
-
-[
-  "object"
-  "type"
-] @keyword.type
-
-[
-  "with"
-  "match"
-  "case"
-  "open"
-  "use"
-  "with"
-  "bend"
-  "when"
-  "fold"
-  "switch"
-  "ask"
-  "let"
-  "in"
-] @keyword
-"#;
