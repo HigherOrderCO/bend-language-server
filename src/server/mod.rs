@@ -98,7 +98,7 @@ impl LanguageServer for Backend {
 
         let uri = params.text_document.uri;
         let semantic_tokens =
-            self.read_document(&uri, |doc| Some(semantic_token::semantic_tokens(doc)));
+            self.read_document(&uri, |doc| Some(semantic_token::semantic_tokens(&doc.text)));
 
         lsp_log::info!(self.client, "got tokens: {:?}", semantic_tokens);
 
