@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use itertools::Itertools;
 use ropey::Rope;
-use tower_lsp::lsp_types::{SemanticToken, SemanticTokenType};
+use tower_lsp::lsp_types::{Range, SemanticToken, SemanticTokenType};
 use tree_sitter_bend::HIGHLIGHTS_QUERY;
 use tree_sitter_highlight::{HighlightConfiguration, HighlightEvent};
 
@@ -67,7 +67,7 @@ lazy_static::lazy_static! {
 }
 
 /// Generate the semantic tokens of a document for syntax highlighting.
-pub fn semantic_tokens(doc: &mut Document) -> Vec<SemanticToken> {
+pub fn semantic_tokens(doc: &mut Document, range: Option<Range>) -> Vec<SemanticToken> {
     let code = doc.text.to_string(); // TODO: this is bad
     let highlights = doc
         .highlighter
@@ -83,6 +83,20 @@ pub fn semantic_tokens(doc: &mut Document) -> Vec<SemanticToken> {
             Result::Ok(HighlightEvent::HighlightStart(h)) => types.push(h.0),
             Result::Ok(HighlightEvent::HighlightEnd) => drop(types.pop()),
             Result::Ok(HighlightEvent::Source { mut start, end }) => {
+                // Ranged or full semantic tokens call
+                if let Some(range) = range {
+                    let rstart = doc.text.line_to_byte(range.start.line as usize);
+                    let rend = doc.text.line_to_byte(range.end.line as usize);
+                    // If we still haven't gotten to the start of the range, continue.
+                    if end < rstart {
+                        continue;
+                    }
+                    // If we got past the end of the range, stop.
+                    if rend < start {
+                        break;
+                    }
+                }
+
                 let token = types
                     .last()
                     .and_then(|curr| HIGHLIGHT_INDEX_TO_LSP_INDEX.get(curr))

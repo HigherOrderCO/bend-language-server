@@ -3,7 +3,7 @@ use std::fs;
 // use bend::diagnostics::Diagnostic;
 use dashmap::DashMap;
 use tower_lsp::jsonrpc::Result;
-use tower_lsp::lsp_types as lsp;
+use tower_lsp::lsp_types::{self as lsp, SemanticTokensRangeResult};
 use tower_lsp::{Client, LanguageServer};
 
 use crate::core::document::{self, Document};
@@ -94,17 +94,47 @@ impl LanguageServer for Backend {
         &self,
         params: lsp::SemanticTokensParams,
     ) -> Result<Option<lsp::SemanticTokensResult>> {
-        lsp_log::info!(self.client, "generating semantic tokens");
+        lsp_log::info!(self.client, "generating full semantic tokens");
 
         let uri = params.text_document.uri;
         let semantic_tokens =
-            self.read_document_mut(&uri, |doc| Some(semantic_token::semantic_tokens(doc)));
+            self.read_document_mut(&uri, |doc| Some(semantic_token::semantic_tokens(doc, None)));
 
         let token_amount = semantic_tokens.as_ref().map(|ts| ts.len()).unwrap_or(0);
         lsp_log::info!(self.client, "got {} tokens", token_amount);
 
         Ok(semantic_tokens.map(|tokens| {
             lsp::SemanticTokensResult::Tokens(lsp::SemanticTokens {
+                result_id: None,
+                data: tokens,
+            })
+        }))
+    }
+
+    async fn semantic_tokens_range(
+        &self,
+        params: lsp::SemanticTokensRangeParams,
+    ) -> Result<Option<SemanticTokensRangeResult>> {
+        let range = params.range;
+        lsp_log::info!(
+            self.client,
+            "generating range {}:{}-{}:{} semantic tokens",
+            range.start.line,
+            range.start.character,
+            range.end.line,
+            range.end.character
+        );
+
+        let uri = params.text_document.uri;
+        let semantic_tokens = self.read_document_mut(&uri, |doc| {
+            Some(semantic_token::semantic_tokens(doc, Some(range)))
+        });
+
+        let token_amount = semantic_tokens.as_ref().map(|ts| ts.len()).unwrap_or(0);
+        lsp_log::info!(self.client, "got {} tokens", token_amount);
+
+        Ok(semantic_tokens.map(|tokens| {
+            lsp::SemanticTokensRangeResult::Tokens(lsp::SemanticTokens {
                 result_id: None,
                 data: tokens,
             })
@@ -168,7 +198,7 @@ impl Backend {
                                 token_types: semantic_token::LEGEND_TOKEN_TYPE.to_vec(),
                                 token_modifiers: vec![],
                             },
-                            range: Some(false),
+                            range: Some(true),
                             full: Some(lsp::SemanticTokensFullOptions::Bool(true)),
                         },
                         static_registration_options: lsp::StaticRegistrationOptions::default(),
