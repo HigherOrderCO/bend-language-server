@@ -14,7 +14,7 @@ pub struct Document {
     pub text: Rope,
     pub tree: Option<ts::Tree>,
     pub parser: ts::Parser,
-    pub highlighter: (hg::Highlighter, &'static hg::HighlightConfiguration),
+    pub highlighter: hg::Highlighter,
     // pub components: HashMap<String, ComponentInfo>
 }
 
@@ -26,7 +26,7 @@ impl Document {
             text: Rope::new(),
             tree: None,
             parser: bend_parser().unwrap(),
-            highlighter: (Highlighter::new(), &HIGHLIGHTER_CONFIG),
+            highlighter: Highlighter::new(),
         }
     }
 

@@ -3,7 +3,6 @@ use std::collections::HashMap;
 use itertools::Itertools;
 use ropey::Rope;
 use tower_lsp::lsp_types::{SemanticToken, SemanticTokenType};
-use tree_sitter as ts;
 use tree_sitter_bend::HIGHLIGHTS_QUERY;
 use tree_sitter_highlight::{HighlightConfiguration, HighlightEvent};
 
@@ -11,12 +10,14 @@ use super::document::Document;
 use crate::language::bend;
 
 lazy_static::lazy_static! {
+    /// Tree sitter capture names into LSP semantic token types.
+    /// Changes to this table don't need to be added anywhere else due to the structures below.
     pub static ref NAME_TO_TOKEN_TYPE: HashMap<&'static str, SemanticTokenType> = {
         HashMap::from([
             ("variable", SemanticTokenType::VARIABLE),
             ("variable.parameter", SemanticTokenType::PARAMETER),
             ("variable.member", SemanticTokenType::ENUM_MEMBER),
-            ("property", SemanticTokenType::PROPERTY),
+            ("property", SemanticTokenType::TYPE),
             ("keyword", SemanticTokenType::KEYWORD),
             ("keyword.conditional", SemanticTokenType::KEYWORD),
             ("keyword.function", SemanticTokenType::KEYWORD),
@@ -33,24 +34,31 @@ lazy_static::lazy_static! {
             ("number", SemanticTokenType::NUMBER),
             ("number.float", SemanticTokenType::NUMBER),
             ("comment", SemanticTokenType::COMMENT),
-            // ("punctuation", SemanticTokenType::?),
-            // ("punctuation.delimiter", SemanticTokenType::?),
-            // ("punctuation.bracket", SemanticTokenType::?),
+            ("punctuation", SemanticTokenType::new("operator")),
+            ("punctuation.delimiter", SemanticTokenType::new("operator")),
+            ("punctuation.bracket", SemanticTokenType::new("operator")),
             ("operator", SemanticTokenType::OPERATOR),
         ])
     };
 
+    /// Legend for token types.
+    /// This is sent to the LSP client with the semantic tokens capabilities.
     pub static ref LEGEND_TOKEN_TYPE: Vec<SemanticTokenType> =
         NAME_TO_TOKEN_TYPE.values().map(|v| v.clone()).unique().collect();
 
+    /// Tree sitter highlighting names.
+    /// This is used to perform syntax highlighting with tree sitter.
     pub static ref HIGHLIGHT_NAMES: Vec<&'static str> =
         NAME_TO_TOKEN_TYPE.keys().map(|x| *x).collect();
 
-    pub static ref NAME_TO_TYPE_INDEX: HashMap<&'static str, usize> = {
+    /// Translate indices from `HIGHLIGHT_NAMES` to indices from `LEGEND_TOKEN_TYPE`.
+    pub static ref HIGHLIGHT_INDEX_TO_LSP_INDEX: HashMap<usize, usize> = {
         let token_type_index: HashMap<_, _> = LEGEND_TOKEN_TYPE.iter().enumerate().map(|(i, v)| (v.clone(), i)).collect();
-        NAME_TO_TOKEN_TYPE.iter().map(|(key, val)| (*key, token_type_index[val])).collect()
+        let highlight_index: HashMap<_, _> = HIGHLIGHT_NAMES.iter().enumerate().map(|(i, v)| (v, i)).collect();
+        NAME_TO_TOKEN_TYPE.iter().map(|(key, val)| (highlight_index[key], token_type_index[val])).collect()
     };
 
+    /// Global configuration for syntax highlighting.
     pub static ref HIGHLIGHTER_CONFIG: HighlightConfiguration = {
         let mut config = HighlightConfiguration::new(bend(), "bend", &HIGHLIGHTS_QUERY, "", "").unwrap();
         config.configure(&HIGHLIGHT_NAMES);
@@ -58,26 +66,33 @@ lazy_static::lazy_static! {
     };
 }
 
+/// Generate the semantic tokens of a document for syntax highlighting.
 pub fn semantic_tokens(doc: &mut Document) -> Vec<SemanticToken> {
     let code = doc.text.to_string(); // TODO: this is bad
-    let (highlighter, config) = &mut doc.highlighter;
+    let highlighter = &mut doc.highlighter;
     let highlights = highlighter
-        .highlight(&config, code.as_bytes(), None, |_| None)
+        .highlight(&HIGHLIGHTER_CONFIG, code.as_bytes(), None, |_| None)
         .unwrap();
 
-    let mut tokens = vec![];
-    let mut typs = vec![];
-    let mut pre_line = 0;
-    let mut pre_start = 0;
+    let mut tokens = vec![]; // result vector
+    let mut typs = vec![]; // token type stack
+    let mut pre_line = 0; // calculate line deltas between tokens
+    let mut pre_start = 0; // calculate index deltas between tokens
     for event in highlights {
         match event {
             Result::Ok(HighlightEvent::HighlightStart(h)) => typs.push(h.0),
             Result::Ok(HighlightEvent::HighlightEnd) => drop(typs.pop()),
-            Result::Ok(HighlightEvent::Source { start, end }) => {
+            Result::Ok(HighlightEvent::Source { mut start, end }) => {
                 typs.last()
-                    .and_then(|curr| HIGHLIGHT_NAMES.get(*curr))
-                    .and_then(|name| NAME_TO_TYPE_INDEX.get(name))
+                    .and_then(|curr| HIGHLIGHT_INDEX_TO_LSP_INDEX.get(curr))
                     .and_then(|type_index| {
+                        // Prevents tokens from starting with new lines or other white space.
+                        // New lines at the start of tokens may break the `make_semantic_token` function.
+                        while start < end && char::from(doc.text.byte(start)).is_whitespace() {
+                            start += 1;
+                        }
+
+                        // Translates the token ranges into the expected struct from LSP.
                         make_semantic_token(
                             &doc.text,
                             start..end,
@@ -95,6 +110,7 @@ pub fn semantic_tokens(doc: &mut Document) -> Vec<SemanticToken> {
     tokens
 }
 
+/// Generates a specific semantic token within the guidelines of the LSP.
 fn make_semantic_token(
     code: &Rope,
     range: std::ops::Range<usize>,
@@ -105,6 +121,7 @@ fn make_semantic_token(
     let line = code.try_byte_to_line(range.start).ok()? as u32;
     let first = code.try_line_to_char(line as usize).ok()? as u32;
     let start = (code.try_byte_to_char(range.start).ok()? as u32).checked_sub(first)?;
+
     let delta_line = line.checked_sub(*pre_line)?;
     let delta_start = if delta_line == 0 {
         start.checked_sub(*pre_start)?
@@ -124,13 +141,12 @@ fn make_semantic_token(
     })
 }
 
+/// Debugging test - tests steps from the semantic token generation algorithm.
 #[test]
 fn token_capture_test() {
     let code: Rope = r#"
-def main(x):
+def main():
   return "Hi!"
-List/flatten (List/Cons x xs) = (List/concat x (List/flatten xs))
-List/flatten (List/Nil)       = (List/Nil)
 "#
     .into();
     let mut highlighter = tree_sitter_highlight::Highlighter::new();
@@ -172,12 +188,15 @@ List/flatten (List/Nil)       = (List/Nil)
             // if the highlight is nested, only save inner range
             Result::Ok(HighlightEvent::HighlightStart(h)) => stack.push(h.0),
             Result::Ok(HighlightEvent::HighlightEnd) => drop(stack.pop()),
-            Result::Ok(HighlightEvent::Source { start, end }) => {
+            Result::Ok(HighlightEvent::Source { mut start, end }) => {
                 stack
                     .last()
-                    .and_then(|curr| HIGHLIGHT_NAMES.get(*curr))
-                    .and_then(|name| NAME_TO_TYPE_INDEX.get(name))
+                    .and_then(|curr| HIGHLIGHT_INDEX_TO_LSP_INDEX.get(curr))
                     .and_then(|type_index| {
+                        while start < end && char::from(code.byte(start)).is_whitespace() {
+                            start += 1;
+                        }
+
                         println!(
                             "{}-{} {:?}: {}",
                             start,
@@ -198,23 +217,32 @@ List/flatten (List/Nil)       = (List/Nil)
             Err(_) => { /* log error? */ }
         }
     }
-}
+    println!();
 
-pub struct TextProviderRope<'a>(pub &'a Rope);
-
-impl<'a> ts::TextProvider<&'a [u8]> for &'a TextProviderRope<'a> {
-    type I = ChunksBytes<'a>;
-    fn text(&mut self, node: tree_sitter::Node) -> Self::I {
-        ChunksBytes(self.0.byte_slice(node.byte_range()).chunks())
+    println!("> got {} tokens", tokens.len());
+    for token in tokens {
+        println!("{:?}", token);
     }
 }
 
-pub struct ChunksBytes<'a>(ropey::iter::Chunks<'a>);
-
-impl<'a> Iterator for ChunksBytes<'a> {
-    type Item = &'a [u8];
-
-    fn next(&mut self) -> Option<Self::Item> {
-        self.0.next().map(|s| s.as_bytes())
-    }
-}
+// TODO: These are necessary for performant rope processing, but `tree_sitter_highlight`
+// still does not work with them.
+//
+// pub struct TextProviderRope<'a>(pub &'a Rope);
+//
+// impl<'a> ts::TextProvider<&'a [u8]> for &'a TextProviderRope<'a> {
+//     type I = ChunksBytes<'a>;
+//     fn text(&mut self, node: tree_sitter::Node) -> Self::I {
+//         ChunksBytes(self.0.byte_slice(node.byte_range()).chunks())
+//     }
+// }
+//
+// pub struct ChunksBytes<'a>(ropey::iter::Chunks<'a>);
+//
+// impl<'a> Iterator for ChunksBytes<'a> {
+//     type Item = &'a [u8];
+//
+//     fn next(&mut self) -> Option<Self::Item> {
+//         self.0.next().map(|s| s.as_bytes())
+//     }
+// }
