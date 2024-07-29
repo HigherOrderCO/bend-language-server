@@ -34,9 +34,9 @@ lazy_static::lazy_static! {
             ("number", SemanticTokenType::NUMBER),
             ("number.float", SemanticTokenType::NUMBER),
             ("comment", SemanticTokenType::COMMENT),
-            ("punctuation", SemanticTokenType::new("operator")),
-            ("punctuation.delimiter", SemanticTokenType::new("operator")),
-            ("punctuation.bracket", SemanticTokenType::new("operator")),
+            // ("punctuation", SemanticTokenType::new("operator")),
+            // ("punctuation.delimiter", SemanticTokenType::new("operator")),
+            // ("punctuation.bracket", SemanticTokenType::new("operator")),
             ("operator", SemanticTokenType::OPERATOR),
         ])
     };

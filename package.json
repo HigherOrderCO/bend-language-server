@@ -7,7 +7,7 @@
     "keywords": [
       "bend",
       "language-server",
-      "tower-lsp"
+      "bend-lsp"
     ],
     "repository": {
       "url": "https://github.com/HigherOrderCO/bend-language-server"
@@ -26,14 +26,15 @@
           "id": "bend",
           "extensions": [
             ".bend"
-          ]
+          ],
+          "configuration": "editors/code/syntaxes/language-configuration.json"
         }
       ],
       "configuration": {
         "type": "object",
-        "title": "bend-language-server",
+        "title": "bend-lsp",
         "properties": {
-          "nrs-language-server.trace.server": {
+          "bend-lsp.trace.server": {
             "type": "string",
             "scope": "window",
             "enum": [
@@ -50,7 +51,14 @@
             "description": "Traces the communication between VS Code and the language server."
           }
         }
-      }
+      },
+      "grammars": [
+        {
+          "language": "bend",
+          "scopeName": "source.bend",
+          "path": "editors/code/syntaxes/bend.tmLanguage.json"
+        }
+      ]
     },
     "scripts": {
       "postinstall": "cd editors/code && pnpm i",

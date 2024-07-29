@@ -1,0 +1,215 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "bend",
+  "fileTypes": [
+    "bend"
+  ],
+  "patterns": [
+    {
+      "name": "comment.line",
+      "begin": "#",
+      "end": "\n",
+      "patterns": [
+        {
+          "name": "keyword.control.BEND",
+          "match": "TODO\\:"
+        }
+      ]
+    },
+    {
+      "include": "#operators"
+    },
+    {
+      "include": "#strings"
+    },
+    {
+      "include": "#numbers"
+    },
+    {
+      "include": "#reserved-words"
+    },
+    {
+      "include": "#operator-dedicated-keywords-statements"
+    },
+    {
+      "include": "#ctrl-statements"
+    },
+    {
+      "include": "#special-keywords"
+    },
+    {
+      "include": "#true-false"
+    },
+    {
+      "include": "#functions"
+    },
+    {
+      "name": "string.quoted.double.carbon",
+      "begin": "\"",
+      "end": "\"",
+      "patterns": [
+        {
+          "include": "#string_escapes"
+        }
+      ]
+    },
+    {
+      "include": "#customs"
+    }
+  ],
+  "repository": {
+    "operators": {
+      "patterns": [
+        {
+          "name": "keyword.operator.new.bend",
+          "match": "\\b(\\+|-|\\*|/|!)\\b"
+        }
+      ]
+    },
+    "string_escapes": {
+      "patterns": [
+        {
+          "name": "constant.character.escape.bend",
+          "match": "\\\\([tnr'\"0\\0]|x[0-9A-F]{2}|u\\{[0-9A-F]{4,}\\})"
+        }
+      ]
+    },
+    "special-keywords": {
+      "patterns": [
+        {
+          "name": "keyword.control.less.bend",
+          "match": "\\b(def|switch|case|return|if|else|when|match|λ|Some|data|let|use|object|fold|open|do|bind|Name|identity|Bool|ask|with)\\b"
+        }
+      ]
+    },
+    "operator-dedicated-keywords-statements": {
+      "patterns": [
+        {
+          "name": "keyword.bend",
+          "match": "\\b(bend|None|Nil|Result|type|lambda)\\b"
+        }
+      ]
+    },
+    "reserved-words": {
+      "patterns": [
+        {
+          "name": "support.type.bend",
+          "match": "\\b(Node|Leaf|Tree)\\b"
+        }
+      ]
+    },
+    "true-false": {
+      "patterns": [
+        {
+          "name": "keyword.operator.new.bend",
+          "match": "\\b(True|False|true|false)\\b"
+        }
+      ]
+    },
+    "functions": {
+      "patterns": [
+        {
+          "name": "support.function.bend",
+          "match": "\\b[a-zA-Z_0-9]+\\s*\\("
+        },
+        {
+          "name": "support.function.bend",
+          "match": "\\b(print)\\b"
+        }
+      ]
+    },
+    "customs": {
+      "patterns": [
+        {
+          "name": "support.class.bend",
+          "match": "(?<=\\bdata\\s)\\w+"
+        },
+        {
+          "name": "support.class.bend",
+          "match": "(?<=\\blet\\s)\\w+"
+        },
+        {
+          "name": "support.class.bend",
+          "match": "(?<=\\bSome\\s)\\w+"
+        },
+        {
+          "name": "support.variable.bend",
+          "match": "(?<=\\s*\\.)\\w+"
+        },
+        {
+          "name": "support.variable.bend",
+          "match": "\\w+(?=\\s*=)"
+        },
+        {
+          "name": "support.variable.bend",
+          "match": "\\w+(?=\\s*<\\-)"
+        },
+        {
+          "name": "support.variable.bend",
+          "match": "(?<=\\bbend\\s)\\w+"
+        },
+        {
+          "name": "support.variable.bend",
+          "match": "(?<=<\\-\\s)\\w+"
+        },
+        {
+          "name": "support.function.bend",
+          "match": "(?<=\\bdef\\s)\\w+"
+        },
+        {
+          "name": "support.function.bend",
+          "match": "(?<=\\bmatch\\s)\\w+"
+        },
+        {
+          "name": "support.variable.bend",
+          "match": "(?<=\\=\\s)\\w+"
+        },
+        {
+          "name": "support.variable.bend",
+          "match": "(?<=\\bcase\\s)\\w+"
+        },
+        {
+          "name": "support.other.bend",
+          "match": "(?<=\\bobject\\s)\\w+"
+        },
+        {
+          "name": "support.type.property-name.bend",
+          "match": "(?<=\\bfold\\s)\\w+"
+        },
+        {
+          "name": "support.class.bend",
+          "match": "(?<=\\bopen\\s)\\w+"
+        },
+        {
+          "name": "support.class.bend",
+          "match": "(?<=\\bdo\\s)\\w+"
+        },
+        {
+          "name": "support.class.bend",
+          "match": "(?<=\\bidentity\\s)\\w+"
+        },
+        {
+          "name": "support.class.bend",
+          "match": "(?<=\\blambda\\s)\\w+"
+        }
+      ]
+    },
+    "numbers": {
+      "patterns": [
+        {
+          "name": "constant.numeric.bend",
+          "match": "\\b\\d+\\b"
+        },
+        {
+          "name": "constant.numeric.bend",
+          "match": "\\b\\d+\\.\\d+\\b"
+        },
+        {
+          "name": "constant.numeric.bend",
+          "match": "\\b\\d{1,3}(?:_\\d{3})*\\b"
+        }
+      ]
+    }
+  },
+  "scopeName": "source.bend"
+}
