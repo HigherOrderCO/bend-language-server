@@ -97,9 +97,8 @@ impl LanguageServer for Backend {
         lsp_log::info!(self.client, "generating semantic tokens");
 
         let uri = params.text_document.uri;
-        let semantic_tokens = self.read_document_mut(&uri, |mut doc| {
-            Some(semantic_token::semantic_tokens(&mut doc))
-        });
+        let semantic_tokens =
+            self.read_document_mut(&uri, |doc| Some(semantic_token::semantic_tokens(doc)));
 
         let token_amount = semantic_tokens.as_ref().map(|ts| ts.len()).unwrap_or(0);
         lsp_log::info!(self.client, "got {} tokens", token_amount);
@@ -206,9 +205,9 @@ impl Backend {
     where
         F: FnMut(&mut Document),
     {
-        self.open_docs
-            .get_mut(url)
-            .map(|mut refer| updater(refer.value_mut()));
+        if let Some(mut doc) = self.open_docs.get_mut(url) {
+            updater(doc.value_mut());
+        }
     }
 
     /// Read the contents of `url` using function `reader`.

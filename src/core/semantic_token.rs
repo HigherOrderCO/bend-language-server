@@ -44,12 +44,12 @@ lazy_static::lazy_static! {
     /// Legend for token types.
     /// This is sent to the LSP client with the semantic tokens capabilities.
     pub static ref LEGEND_TOKEN_TYPE: Vec<SemanticTokenType> =
-        NAME_TO_TOKEN_TYPE.values().map(|v| v.clone()).unique().collect();
+        NAME_TO_TOKEN_TYPE.values().cloned().unique().collect();
 
     /// Tree sitter highlighting names.
     /// This is used to perform syntax highlighting with tree sitter.
     pub static ref HIGHLIGHT_NAMES: Vec<&'static str> =
-        NAME_TO_TOKEN_TYPE.keys().map(|x| *x).collect();
+        NAME_TO_TOKEN_TYPE.keys().copied().collect();
 
     /// Translate indices from `HIGHLIGHT_NAMES` to indices from `LEGEND_TOKEN_TYPE`.
     pub static ref HIGHLIGHT_INDEX_TO_LSP_INDEX: HashMap<usize, usize> = {
@@ -60,7 +60,7 @@ lazy_static::lazy_static! {
 
     /// Global configuration for syntax highlighting.
     pub static ref HIGHLIGHTER_CONFIG: HighlightConfiguration = {
-        let mut config = HighlightConfiguration::new(bend(), "bend", &HIGHLIGHTS_QUERY, "", "").unwrap();
+        let mut config = HighlightConfiguration::new(bend(), "bend", HIGHLIGHTS_QUERY, "", "").unwrap();
         config.configure(&HIGHLIGHT_NAMES);
         config
     };
@@ -69,21 +69,22 @@ lazy_static::lazy_static! {
 /// Generate the semantic tokens of a document for syntax highlighting.
 pub fn semantic_tokens(doc: &mut Document) -> Vec<SemanticToken> {
     let code = doc.text.to_string(); // TODO: this is bad
-    let highlighter = &mut doc.highlighter;
-    let highlights = highlighter
+    let highlights = doc
+        .highlighter
         .highlight(&HIGHLIGHTER_CONFIG, code.as_bytes(), None, |_| None)
         .unwrap();
 
     let mut tokens = vec![]; // result vector
-    let mut typs = vec![]; // token type stack
+    let mut types = vec![]; // token type stack
     let mut pre_line = 0; // calculate line deltas between tokens
     let mut pre_start = 0; // calculate index deltas between tokens
     for event in highlights {
         match event {
-            Result::Ok(HighlightEvent::HighlightStart(h)) => typs.push(h.0),
-            Result::Ok(HighlightEvent::HighlightEnd) => drop(typs.pop()),
+            Result::Ok(HighlightEvent::HighlightStart(h)) => types.push(h.0),
+            Result::Ok(HighlightEvent::HighlightEnd) => drop(types.pop()),
             Result::Ok(HighlightEvent::Source { mut start, end }) => {
-                typs.last()
+                let token = types
+                    .last()
                     .and_then(|curr| HIGHLIGHT_INDEX_TO_LSP_INDEX.get(curr))
                     .and_then(|type_index| {
                         // Prevents tokens from starting with new lines or other white space.
@@ -100,8 +101,11 @@ pub fn semantic_tokens(doc: &mut Document) -> Vec<SemanticToken> {
                             &mut pre_line,
                             &mut pre_start,
                         )
-                    })
-                    .map(|token| tokens.push(token));
+                    });
+
+                if let Some(token) = token {
+                    tokens.push(token);
+                }
             }
             Err(_) => { /* log error? */ }
         }
