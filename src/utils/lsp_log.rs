@@ -1,16 +1,23 @@
-// macro_rules! error {
-//     ($client:expr, $($arg:tt)+) => {
-//         $client.log_message(tower_lsp::lsp_types::MessageType::ERROR, format!($($arg)+)).await;
-//     };
-// }
-// pub(crate) use error;
+//! Logging module.
+//!
+//! Contains macros to easily send logging information to the client from the language server.
 
-// macro_rules! warning {
-//     ($client:expr, $($arg:tt)+) => {
-//         $client.log_message(tower_lsp::lsp_types::MessageType::WARNING, format!($($arg)+)).await;
-//     };
-// }
-// pub(crate) use warning;
+#![allow(unused_macros)]
+#![allow(unused_imports)]
+
+macro_rules! error {
+    ($client:expr, $($arg:tt)+) => {
+        $client.log_message(tower_lsp::lsp_types::MessageType::ERROR, format!($($arg)+)).await;
+    };
+}
+pub(crate) use error;
+
+macro_rules! warning {
+    ($client:expr, $($arg:tt)+) => {
+        $client.log_message(tower_lsp::lsp_types::MessageType::WARNING, format!($($arg)+)).await;
+    };
+}
+pub(crate) use warning;
 
 macro_rules! info {
     ($client:expr, $($arg:tt)+) => {

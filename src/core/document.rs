@@ -5,6 +5,7 @@ use tree_sitter_highlight::{self as hg, Highlighter};
 
 use crate::language::bend_parser;
 
+/// Represents a text document open in the client's text editor.
 pub struct Document {
     pub url: lsp::Url,
     pub text: Rope,
