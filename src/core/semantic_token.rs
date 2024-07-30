@@ -74,6 +74,13 @@ pub fn semantic_tokens(doc: &mut Document, range: Option<Range>) -> Vec<Semantic
         .highlight(&HIGHLIGHTER_CONFIG, code.as_bytes(), None, |_| None)
         .unwrap();
 
+    // Get byte indices of line positions in the range, if it exists
+    let range = range.map(|r| {
+        let rstart = doc.text.line_to_byte(r.start.line as usize);
+        let rend = doc.text.line_to_byte(r.end.line as usize + 1);
+        rstart..rend
+    });
+
     let mut tokens = vec![]; // result vector
     let mut types = vec![]; // token type stack
     let mut pre_line = 0; // calculate line deltas between tokens
@@ -84,15 +91,13 @@ pub fn semantic_tokens(doc: &mut Document, range: Option<Range>) -> Vec<Semantic
             Result::Ok(HighlightEvent::HighlightEnd) => drop(types.pop()),
             Result::Ok(HighlightEvent::Source { mut start, end }) => {
                 // Ranged or full semantic tokens call
-                if let Some(range) = range {
-                    let rstart = doc.text.line_to_byte(range.start.line as usize);
-                    let rend = doc.text.line_to_byte(range.end.line as usize);
+                if let Some(range) = &range {
                     // If we still haven't gotten to the start of the range, continue.
-                    if end < rstart {
+                    if end < range.start {
                         continue;
                     }
                     // If we got past the end of the range, stop.
-                    if rend < start {
+                    if range.end < start {
                         break;
                     }
                 }
