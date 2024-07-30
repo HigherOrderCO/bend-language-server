@@ -205,15 +205,15 @@ impl Backend {
                     },
                 ),
             ),
-            definition_provider: Some(lsp::OneOf::Left(true)),
-            completion_provider: Some(lsp::CompletionOptions {
-                resolve_provider: Some(false),
-                trigger_characters: Some(vec!["/".into()]),
-                all_commit_characters: None,
-                work_done_progress_options: Default::default(),
-                completion_item: None,
-            }),
-            hover_provider: Some(lsp::HoverProviderCapability::Simple(false)),
+            // definition_provider: Some(lsp::OneOf::Left(true)),
+            // completion_provider: Some(lsp::CompletionOptions {
+            //     resolve_provider: Some(false),
+            //     trigger_characters: Some(vec!["/".into()]),
+            //     all_commit_characters: None,
+            //     work_done_progress_options: Default::default(),
+            //     completion_item: None,
+            // }),
+            // hover_provider: Some(lsp::HoverProviderCapability::Simple(false)),
             ..Default::default()
         }
     }

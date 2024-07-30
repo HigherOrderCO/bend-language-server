@@ -136,8 +136,7 @@ dependencies = [
 [[package]]
 name = "bend-lang"
 version = "0.2.36"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1fb868aa25861f01bbf40d2990972f29fc9687f0e887ce8a7a284770972e1a5b"
+source = "git+https://github.com/HigherOrderCO/bend.git#3e182caf2574ef2ea3a998ba02d04c9bcc535571"
 dependencies = [
  "TSPL",
  "clap",
