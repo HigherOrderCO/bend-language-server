@@ -22,5 +22,20 @@ pub fn check(doc: &Document) -> Result<Diagnostics, Diagnostics> {
 }
 
 pub fn lsp_diagnostic(diagnostics: &Diagnostics) -> Vec<lsp::Diagnostic> {
-    todo!()
+    diagnostics
+        .diagnostics
+        .values()
+        .flatten()
+        .map(|diag| lsp::Diagnostic {
+            range: lsp::Range::default(),
+            severity: Some(lsp::DiagnosticSeverity::WARNING),
+            code: todo!(),
+            code_description: todo!(),
+            source: todo!(),
+            message: todo!(),
+            related_information: todo!(),
+            tags: todo!(),
+            data: todo!(),
+        })
+        .collect()
 }
