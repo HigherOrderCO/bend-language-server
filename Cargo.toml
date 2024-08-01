@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-bend-lang = { git = "https://github.com/HigherOrderCO/bend.git" }
+bend-lang = { git = "https://github.com/HigherOrderCO/bend.git", branch = "lsp-experiments" }
 tree-sitter-bend = { git = "https://github.com/HigherOrderCO/tree-sitter-bend.git" }
 tower-lsp = { version = "0.20", features = ["proposed"] }
 tokio = { version = "1.17", features = ["full"] }

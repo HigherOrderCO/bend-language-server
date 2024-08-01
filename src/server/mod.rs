@@ -6,6 +6,7 @@ use tower_lsp::jsonrpc::Result;
 use tower_lsp::lsp_types::{self as lsp, SemanticTokensRangeResult};
 use tower_lsp::{Client, LanguageServer};
 
+use crate::core::diagnostic;
 use crate::core::document::{self, Document};
 use crate::core::semantic_token;
 use crate::utils::lsp_log;
@@ -48,7 +49,7 @@ impl LanguageServer for Backend {
             // TODO: configuration
         }
 
-        // self.pub
+        self.publish_all_diagnostics().await;
 
         lsp_log::info!(self.client, "bend-lsp initialized");
     }
@@ -64,6 +65,14 @@ impl LanguageServer for Backend {
 
         self.open_doc(params.text_document.uri.clone(), params.text_document.text);
         self.publish_diagnostics(&params.text_document.uri).await;
+    }
+
+    async fn did_change_configuration(&self, _params: lsp::DidChangeConfigurationParams) {
+        lsp_log::info!(self.client, "changing language server configurations");
+
+        // TODO: configuration
+
+        self.publish_all_diagnostics().await;
     }
 
     async fn did_change(&self, params: lsp::DidChangeTextDocumentParams) {
@@ -88,6 +97,9 @@ impl LanguageServer for Backend {
             "document saved at {}",
             params.text_document.uri
         );
+
+        let url = &params.text_document.uri;
+        self.publish_diagnostics(url).await;
     }
 
     async fn semantic_tokens_full(
@@ -227,7 +239,15 @@ impl Backend {
 
     /// Publish diagnostics for document `url`.
     async fn publish_diagnostics(&self, url: &lsp::Url) {
-        // todo!()
+        let diags = self
+            .read_document(url, |doc| {
+                Some(diagnostic::lsp_diagnostic(&diagnostic::check(doc)))
+            })
+            .unwrap_or_default();
+
+        self.client
+            .publish_diagnostics(url.clone(), diags, None)
+            .await;
     }
 
     /// Update the document at `url` using function `updater`.
