@@ -6,7 +6,7 @@ use tower_lsp::jsonrpc::Result;
 use tower_lsp::lsp_types::{self as lsp, SemanticTokensRangeResult};
 use tower_lsp::{Client, LanguageServer};
 
-use crate::core::diagnostic;
+use crate::core::diagnostics;
 use crate::core::document::{self, Document};
 use crate::core::semantic_token;
 use crate::utils::lsp_log;
@@ -241,7 +241,7 @@ impl Backend {
     async fn publish_diagnostics(&self, url: &lsp::Url) {
         let diags = self
             .read_document(url, |doc| {
-                Some(diagnostic::lsp_diagnostic(&diagnostic::check(doc)))
+                Some(diagnostics::lsp_diagnostic(&diagnostics::check(doc)))
             })
             .unwrap_or_default();
 
