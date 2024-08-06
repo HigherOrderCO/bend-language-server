@@ -241,9 +241,11 @@ impl Backend {
     async fn publish_diagnostics(&self, url: &lsp::Url) {
         let diags = self
             .read_document(url, |doc| {
-                Some(diagnostics::lsp_diagnostic(&diagnostics::check(doc)))
+                Some(diagnostics::lsp_diagnostics(&diagnostics::check(doc)))
             })
             .unwrap_or_default();
+
+        lsp_log::info!(self.client, "got diagnostics: {:?}", diags);
 
         self.client
             .publish_diagnostics(url.clone(), diags, None)

@@ -1,5 +1,5 @@
 //! Language module.
-//! 
+//!
 //! Deals with processing directly related to the Bend language.
 //! Right now it only returns the parser from tree sitter, but in the future we
 //! might do additional processing from this module.

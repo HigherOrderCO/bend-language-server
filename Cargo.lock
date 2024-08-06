@@ -135,7 +135,7 @@ dependencies = [
 [[package]]
 name = "bend-lang"
 version = "0.2.36"
-source = "git+https://github.com/HigherOrderCO/Bend.git?branch=lsp-experiments#3528c0cde698a9e909f05935c3c9ea05b0f7603b"
+source = "git+https://github.com/HigherOrderCO/Bend.git?branch=lsp-experiments#cf376afdc165e42963f7c92d64f7959a1ae89687"
 dependencies = [
  "TSPL",
  "clap",
