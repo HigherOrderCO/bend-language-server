@@ -25,15 +25,18 @@ pub fn check(doc: &Document) -> Diagnostics {
 pub fn lsp_diagnostics(diagnostics: &Diagnostics) -> Vec<lsp::Diagnostic> {
     diagnostics
         .diagnostics
-        .values()
-        .flatten()
-        .filter_map(treat_diagnostic)
+        // Iter<(DiagnosticOrigin, Vec<Diagnostic>)>
+        .iter()
+        // -> Iter<(DiagnosticOrigin, Diagnostic)>
+        .flat_map(|(key, vals)| vals.iter().map(move |val| (key, val)))
+        // Ignore unwanted diagnostics
+        .filter_map(|(origin, diagnostic)| treat_diagnostic(origin, diagnostic))
         .collect()
 }
 
-fn treat_diagnostic(diag: &Diagnostic) -> Option<lsp::Diagnostic> {
+fn treat_diagnostic(origin: &DiagnosticOrigin, diag: &Diagnostic) -> Option<lsp::Diagnostic> {
     Some(lsp::Diagnostic {
-        message: diag.message.clone(),
+        message: format!("{}", diag.display_with_origin(origin)),
         severity: match diag.severity {
             Severity::Allow => Some(lsp::DiagnosticSeverity::HINT),
             Severity::Warning => Some(lsp::DiagnosticSeverity::WARNING),
