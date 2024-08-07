@@ -56,12 +56,12 @@ fn treat_diagnostic(diag: &Diagnostic) -> Option<lsp::Diagnostic> {
 fn span_to_range(span: &TextSpan) -> lsp::Range {
     lsp::Range {
         start: Position {
-            line: span.0.line as u32,
-            character: span.0.char as u32,
+            line: span.start.line as u32,
+            character: span.start.char as u32,
         },
         end: Position {
-            line: span.1.line as u32,
-            character: span.1.char as u32,
+            line: span.end.line as u32,
+            character: span.end.char as u32,
         },
     }
 }

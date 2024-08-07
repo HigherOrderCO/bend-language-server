@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-bend-lang = "0.2.36"
+bend-lang = { git = "https://github.com/HigherOrderCO/Bend.git", branch = "lsp-experiments" }
 tree-sitter-bend = { git = "https://github.com/HigherOrderCO/tree-sitter-bend.git" }
 tower-lsp = { version = "0.20", features = ["proposed"] }
 tokio = { version = "1.17", features = ["full"] }
@@ -24,6 +24,4 @@ ropey = "1.6"
 cc = "1.1"
 
 [patch.crates-io]
-bend-lang = { git = "https://github.com/HigherOrderCO/Bend.git", branch = "lsp-experiments" }
-TSPL = { git = "https://github.com/HigherOrderCO/TSPL.git", branch = "range-info" }
-hvm = { git = "https://github.com/higherorderco/hvm.git", branch = "parser-update" }
+hvm = { git = "https://github.com/HigherOrderCO/hvm.git", branch = "parser-update" }
