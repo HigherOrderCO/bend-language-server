@@ -5,6 +5,7 @@ use bend::{check_book, imports::DefaultLoader, CompileOpts};
 use tower_lsp::lsp_types::{self as lsp, Position};
 
 use super::document::Document;
+use crate::utils::color_wrapper::treat_colors;
 
 /// Checks a Bend file and return its diagnostics.
 pub fn check(doc: &Document) -> Diagnostics {
@@ -36,7 +37,7 @@ pub fn lsp_diagnostics(diagnostics: &Diagnostics) -> Vec<lsp::Diagnostic> {
 
 fn treat_diagnostic(origin: &DiagnosticOrigin, diag: &Diagnostic) -> Option<lsp::Diagnostic> {
     Some(lsp::Diagnostic {
-        message: format!("{}", diag.display_with_origin(origin)),
+        message: treat_colors(&diag.display_with_origin(origin).to_string()),
         severity: match diag.severity {
             Severity::Allow => Some(lsp::DiagnosticSeverity::HINT),
             Severity::Warning => Some(lsp::DiagnosticSeverity::WARNING),

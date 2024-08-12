@@ -1,6 +1,5 @@
 use std::fs;
 
-// use bend::diagnostics::Diagnostic;
 use dashmap::DashMap;
 use tower_lsp::jsonrpc::Result;
 use tower_lsp::lsp_types::{self as lsp, SemanticTokensRangeResult};

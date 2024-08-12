@@ -161,6 +161,7 @@ dependencies = [
  "itertools 0.13.0",
  "lazy_static",
  "log",
+ "regex",
  "ropey",
  "serde",
  "serde_json",
