@@ -3,7 +3,8 @@ use tower_lsp::lsp_types as lsp;
 use tree_sitter as ts;
 use tree_sitter_highlight::{self as hg, Highlighter};
 
-use crate::language::bend_parser;
+use crate::language::{bend, bend_parser};
+use crate::utils::rope::TextProviderRope;
 
 /// Represents a text document open in the client's text editor.
 pub struct Document {
@@ -38,5 +39,38 @@ impl Document {
     pub fn update_whole_text(&mut self, text: &str) {
         self.text = Rope::from_str(text);
         self.tree = self.parser.parse(text, None);
+    }
+
+    pub fn get_tree(&mut self) -> &ts::Tree {
+        if self.tree.is_none() {
+            self.do_parse();
+        }
+        self.tree.as_ref().expect("tried to get empty tree")
+    }
+
+    /// Find up to one node based on a tree-sitter query.
+    pub fn find_one(&self, query: &str) -> Option<ts::Node> {
+        let mut cursor = ts::QueryCursor::new();
+        let query = ts::Query::new(&bend(), query).unwrap();
+        let root = self.tree.as_ref()?.root_node();
+
+        cursor
+            .captures(&query, root, &TextProviderRope(&self.text))
+            .flat_map(|(m, _)| m.captures)
+            .next()
+            .map(|capture| capture.node)
+    }
+
+    fn do_parse(&mut self) -> Option<ts::Tree> {
+        self.parser.parse_with(
+            &mut |start_byte, _| {
+                self.text
+                    .byte_slice(start_byte..)
+                    .chunks()
+                    .next()
+                    .unwrap_or("")
+            },
+            self.tree.as_ref(),
+        )
     }
 }

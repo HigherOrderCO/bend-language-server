@@ -1,5 +1,3 @@
-use std::fs;
-
 use dashmap::DashMap;
 use tower_lsp::jsonrpc::Result;
 use tower_lsp::lsp_types::{self as lsp, SemanticTokensRangeResult};
@@ -240,7 +238,7 @@ impl Backend {
     async fn publish_diagnostics(&self, url: &lsp::Url) {
         let diags = self
             .read_document(url, |doc| {
-                Some(diagnostics::lsp_diagnostics(&diagnostics::check(doc)))
+                Some(diagnostics::lsp_diagnostics(doc, &diagnostics::check(doc)))
             })
             .unwrap_or_default();
 
@@ -287,10 +285,10 @@ impl Backend {
             .insert(url.clone(), Document::new_with_text(url, &text));
     }
 
-    /// Open a new document at `url` with its contents from the file system.
-    fn open_doc_from_path(&self, url: lsp::Url) {
-        if let Ok(text) = fs::read_to_string(url.to_file_path().unwrap()) {
-            self.open_doc(url, text);
-        }
-    }
+    // Open a new document at `url` with its contents from the file system.
+    // fn open_doc_from_path(&self, url: lsp::Url) {
+    //     if let Ok(text) = fs::read_to_string(url.to_file_path().unwrap()) {
+    //         self.open_doc(url, text);
+    //     }
+    // }
 }

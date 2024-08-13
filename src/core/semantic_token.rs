@@ -175,7 +175,8 @@ def main():
     let mut highlighter = tree_sitter_highlight::Highlighter::new();
     let config = &HIGHLIGHTER_CONFIG;
 
-    let text = code.to_string(); // TODO: this is bad
+    // TODO: use TextProviderRope when the highlighting crate allows it
+    let text = code.to_string();
     let highlights = highlighter
         .highlight(&config, text.as_bytes(), None, |_| None)
         .unwrap();
@@ -247,25 +248,3 @@ def main():
         println!("{:?}", token);
     }
 }
-
-// TODO: These are necessary for performant rope processing, but `tree_sitter_highlight`
-// still does not work with them.
-//
-// pub struct TextProviderRope<'a>(pub &'a Rope);
-//
-// impl<'a> ts::TextProvider<&'a [u8]> for &'a TextProviderRope<'a> {
-//     type I = ChunksBytes<'a>;
-//     fn text(&mut self, node: tree_sitter::Node) -> Self::I {
-//         ChunksBytes(self.0.byte_slice(node.byte_range()).chunks())
-//     }
-// }
-//
-// pub struct ChunksBytes<'a>(ropey::iter::Chunks<'a>);
-//
-// impl<'a> Iterator for ChunksBytes<'a> {
-//     type Item = &'a [u8];
-//
-//     fn next(&mut self) -> Option<Self::Item> {
-//         self.0.next().map(|s| s.as_bytes())
-//     }
-// }
