@@ -136,7 +136,7 @@ dependencies = [
 [[package]]
 name = "bend-lang"
 version = "0.2.36"
-source = "git+https://github.com/HigherOrderCO/Bend.git?branch=lsp-experiments#f9198f4b9f015a483291e6a8027e673ee856e159"
+source = "git+https://github.com/HigherOrderCO/Bend.git?branch=lsp-experiments#4e155ccce6dd928f2328fe15e9b26db5620650cc"
 dependencies = [
  "TSPL",
  "clap",
@@ -447,7 +447,8 @@ checksum = "9a3a5bfb195931eeb336b2a7b4d761daec841b97f947d34394601737a7bba5e4"
 [[package]]
 name = "hvm"
 version = "2.0.22"
-source = "git+https://github.com/HigherOrderCO/hvm.git?branch=parser-update#2a207a6b13aa75704e25d95813082b40b6353ecd"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3fafa02949c005e70869074ac9db489ad92eaf92c78b4dcf6c0b45d98982c08d"
 dependencies = [
  "TSPL",
  "cc",

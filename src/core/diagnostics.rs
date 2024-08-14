@@ -49,7 +49,9 @@ fn treat_diagnostic(
             Severity::Error => Some(lsp::DiagnosticSeverity::ERROR),
         },
         range: match origin {
-            DiagnosticOrigin::Rule(name) => find_rule(doc, name.as_ref())?,
+            DiagnosticOrigin::Rule(name) => find_def(doc, name.as_ref())?,
+            DiagnosticOrigin::Function(name) => find_def(doc, name.as_ref())?,
+            DiagnosticOrigin::Inet(name) => find_def(doc, name.as_ref())?,
             _ => span_to_range(&diag.span),
         },
         code: None,
@@ -61,9 +63,10 @@ fn treat_diagnostic(
     })
 }
 
-/// Diagnostics with `Rule` origins may have their spans including entire definitions,
-/// while we would only like to highlight their names.
-fn find_rule(doc: &Document, name: &str) -> Option<lsp::Range> {
+/// Diagnostics with `Rule`, `Function` or `Inet` origins may have their
+/// spans including entire definitions, while we would only like to
+/// highlight their names.
+fn find_def(doc: &Document, name: &str) -> Option<lsp::Range> {
     let query = format!(
         r#"
         (fun_function_definition
