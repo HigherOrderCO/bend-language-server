@@ -49,7 +49,6 @@ fn treat_diagnostic(
             Severity::Error => Some(lsp::DiagnosticSeverity::ERROR),
         },
         range: match origin {
-            DiagnosticOrigin::Rule(name) => find_def(doc, name.as_ref())?,
             DiagnosticOrigin::Function(name) => find_def(doc, name.as_ref())?,
             DiagnosticOrigin::Inet(name) => find_def(doc, name.as_ref())?,
             _ => span_to_range(&diag.span),
