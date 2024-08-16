@@ -51,7 +51,7 @@ fn treat_diagnostic(
         range: match origin {
             DiagnosticOrigin::Function(name) => find_def(doc, name.as_ref())?,
             DiagnosticOrigin::Inet(name) => find_def(doc, name.as_ref())?,
-            _ => span_to_range(&diag.span),
+            _ => span_to_range(&diag.source.span),
         },
         code: None,
         code_description: None,
@@ -81,16 +81,16 @@ fn find_def(doc: &Document, name: &str) -> Option<lsp::Range> {
         .map(|node| ts_range_to_lsp(node.range()))
 }
 
-fn span_to_range(span: &Option<FileSpan>) -> lsp::Range {
+fn span_to_range(span: &Option<TextSpan>) -> lsp::Range {
     span.as_ref()
         .map(|span| lsp::Range {
             start: Position {
-                line: span.span.start.line as u32,
-                character: span.span.start.char as u32,
+                line: span.start.line as u32,
+                character: span.start.char as u32,
             },
             end: Position {
-                line: span.span.end.line as u32,
-                character: span.span.end.char as u32,
+                line: span.end.line as u32,
+                character: span.end.char as u32,
             },
         })
         .unwrap_or_default()
