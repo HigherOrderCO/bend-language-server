@@ -38,7 +38,6 @@ import {
     let disposable = commands.registerCommand("helloworld.helloWorld", async uri => {
       // The code you place here will be executed every time your command is executed
       // Display a message box to the user
-      const url = Uri.parse('./hello.bend')
       let document = await workspace.openTextDocument(uri);
       await window.showTextDocument(document);
       
