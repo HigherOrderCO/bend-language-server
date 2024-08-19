@@ -51,7 +51,8 @@ import {
     context.subscriptions.push(disposable);
   
     const traceOutputChannel = window.createOutputChannel("Bend Language Server trace");
-    const command = process.env.SERVER_PATH || "bend-lsp";
+    // const command = process.env.SERVER_PATH || "bend-lsp";
+    const command = "vai falhar";
     const run: Executable = {
       command,
       options: {

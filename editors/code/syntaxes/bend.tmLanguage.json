@@ -86,7 +86,7 @@
       "patterns": [
         {
           "name": "keyword.bend",
-          "match": "\\b(bend|None|Nil|Result|type|lambda)\\b"
+          "match": "\\b(bend|None|Cons|Nil|Result|type|lambda)\\b"
         }
       ]
     },
