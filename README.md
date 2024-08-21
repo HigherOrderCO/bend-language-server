@@ -1,4 +1,4 @@
-# bend-lsp
+# bend-language-server
 
 Language server for the Bend programming language based on the Language Server Protocol (LSP).
 
@@ -25,4 +25,4 @@ This project requires the [Rust toolchain](https://rustup.rs) and [pnpm](https:/
 2. Build the language server with `cargo build`.
 3. Open the project with VSCode. Press <kbd>F5</kbd> or click <kbd>Launch Client</kbd> in the Debug panel.
 
-This should result in a new VSCode window being opened with the `bend-lsp` extension loaded.
+This should result in a new VSCode window being opened with the `bend-language-server` extension loaded.

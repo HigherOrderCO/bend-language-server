@@ -1,5 +1,5 @@
 {
-    "name": "bend-lsp",
+    "name": "bend-language-server",
     "description": "Language server for the Bend programming language",
     "license": "MIT",
     "version": "0.1.0",
@@ -7,6 +7,7 @@
     "keywords": [
       "bend",
       "language-server",
+      "bend-language-server",
       "bend-lsp"
     ],
     "repository": {
@@ -32,9 +33,9 @@
       ],
       "configuration": {
         "type": "object",
-        "title": "bend-lsp",
+        "title": "bend-language-server",
         "properties": {
-          "bend-lsp.trace.server": {
+          "bend-language-server.trace.server": {
             "type": "string",
             "scope": "window",
             "enum": [

@@ -38,7 +38,7 @@ impl LanguageServer for Backend {
             .client
             .configuration(vec![lsp::ConfigurationItem {
                 scope_uri: Some(lsp::Url::parse("file:///libraryPaths").unwrap()),
-                section: Some("bend-lsp".to_string()),
+                section: Some("bend-language-server".to_string()),
             }])
             .await;
 
@@ -48,7 +48,7 @@ impl LanguageServer for Backend {
 
         self.publish_all_diagnostics().await;
 
-        lsp_log::info!(self.client, "bend-lsp initialized");
+        lsp_log::info!(self.client, "bend-language-server initialized");
     }
 
     async fn shutdown(&self) -> Result<()> {
