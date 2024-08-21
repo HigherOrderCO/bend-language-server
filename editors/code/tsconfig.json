@@ -1,11 +1,12 @@
 {
 	"compilerOptions": {
-		"module": "commonjs",
+		"module": "nodenext",
 		"target": "es2019",
 		"lib": ["ES2019"],
 		"outDir": "../../dist",
 		"rootDir": "src",
-		"sourceMap": true
+		"sourceMap": true,
+		"moduleResolution": "nodenext"
 	},
 	"include": ["src"],
 	"exclude": ["node_modules", ".vscode-test"]

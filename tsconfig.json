@@ -1,11 +1,12 @@
 {
 	"compilerOptions": {
-		"module": "commonjs",
+		"module": "nodenext",
 		"target": "es2019",
 		"lib": ["ES2019"],
 		"outDir": "out",
 		"rootDir": "src",
-		"sourceMap": true
+		"sourceMap": true,
+		"moduleResolution": "nodenext"
 	},
 	"include": [
 		"src"
@@ -16,5 +17,5 @@
 	],
 	"references": [
 		{ "path": "./editors/code" },
-	]
+	],
 }

@@ -30,7 +30,13 @@ import {
     LanguageClientOptions,
     ServerOptions,
   } from "vscode-languageclient/node";
-  
+
+  import {
+    createStdioOptions,
+    createUriConverters,
+    startServer
+  } from '@vscode/wasm-wasi-lsp';
+
   let client: LanguageClient;
   // type a = Parameters<>;
   
@@ -51,8 +57,7 @@ import {
     context.subscriptions.push(disposable);
   
     const traceOutputChannel = window.createOutputChannel("Bend Language Server trace");
-    // const command = process.env.SERVER_PATH || "bend-language-server";
-    const command = "vai falhar";
+    const command = process.env.SERVER_PATH || "bend-language-server";
     const run: Executable = {
       command,
       options: {
