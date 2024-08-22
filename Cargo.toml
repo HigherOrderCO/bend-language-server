@@ -7,6 +7,7 @@ edition = "2021"
 bend-lang = { git = "https://github.com/HigherOrderCO/Bend.git" }
 tree-sitter-bend = { git = "https://github.com/HigherOrderCO/tree-sitter-bend.git" }
 tower-lsp = { version = "0.20", features = ["proposed"] }
+tokio = { version = "1.39", features = ["sync", "macros", "io-util", "rt", "rt-multi-thread", "io-std", "time"] }
 serde = { version = "1.0", features = ["derive"] }
 anyhow = "1.0"
 tree-sitter = "0.22"
@@ -19,9 +20,3 @@ lazy_static = "1.5"
 itertools = "0.13"
 ropey = "1.6"
 regex = "1.7"
-
-[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
-tokio = { version = "1.39", features = ["sync", "macros", "io-util", "io-std", "rt", "rt-multi-thread", "time"] }
-
-[target.'cfg(target_arch = "wasm32")'.dependencies]
-wasi-async-runtime = { version = "0.1" }

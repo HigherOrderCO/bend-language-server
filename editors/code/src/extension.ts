@@ -31,14 +31,7 @@ import {
     ServerOptions,
   } from "vscode-languageclient/node";
 
-  import {
-    createStdioOptions,
-    createUriConverters,
-    startServer
-  } from '@vscode/wasm-wasi-lsp';
-
   let client: LanguageClient;
-  // type a = Parameters<>;
   
   export async function activate(context: ExtensionContext) {
     let disposable = commands.registerCommand("helloworld.helloWorld", async uri => {
