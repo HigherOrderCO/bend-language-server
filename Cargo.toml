@@ -1,11 +1,11 @@
 [package]
 name = "bend-language-server"
-version = "0.1.0"
+version = "0.2.37-alpha.1"
 edition = "2021"
 
 [dependencies]
 bend-lang = { git = "https://github.com/HigherOrderCO/Bend.git" }
-tree-sitter-bend = { git = "https://github.com/HigherOrderCO/tree-sitter-bend.git" }
+tree-sitter-bend = { version = "0.2.37-alpha.1" }
 tower-lsp = { version = "0.20", features = ["proposed"] }
 tokio = { version = "1.39", features = ["sync", "macros", "io-util", "rt", "rt-multi-thread", "io-std", "time"] }
 serde = { version = "1.0", features = ["derive"] }
