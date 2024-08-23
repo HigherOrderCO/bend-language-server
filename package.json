@@ -91,8 +91,6 @@
       "webpack": "^5.82.1"
     },
     "dependencies": {
-      "vscode-languageclient": "10.0.0-next.7",
-      "@vscode/wasm-wasi-lsp": "0.1.0-pre.6",
-      "@vscode/wasm-wasi": "0.13.0-pre.1"
+      "vscode-languageclient": "10.0.0-next.7"
     }
   }

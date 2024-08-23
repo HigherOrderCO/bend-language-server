@@ -51,13 +51,13 @@ export async function activate(context: ExtensionContext) {
   const command = process.env.SERVER_PATH || "bend-language-server";
 
   // We have to check if `bend-language-server` is installed, and if it's not, try to install it.
-  
 
   const run: Executable = {
     command,
     options: {
       env: {
         ...process.env,
+        RUST_LOG: "info",
       },
     },
   };

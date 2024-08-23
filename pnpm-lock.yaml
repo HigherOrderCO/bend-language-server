@@ -8,12 +8,6 @@ importers:
 
   .:
     dependencies:
-      '@vscode/wasm-wasi':
-        specifier: 0.13.0-pre.1
-        version: 0.13.0-pre.1
-      '@vscode/wasm-wasi-lsp':
-        specifier: 0.1.0-pre.6
-        version: 0.1.0-pre.6(@vscode/wasm-wasi@0.13.0-pre.1)(vscode-languageclient@10.0.0-next.7)
       vscode-languageclient:
         specifier: 10.0.0-next.7
         version: 10.0.0-next.7
@@ -267,18 +261,6 @@ packages:
   '@vscode/test-electron@2.4.1':
     resolution: {integrity: sha512-Gc6EdaLANdktQ1t+zozoBVRynfIsMKMc94Svu1QreOBC8y76x4tvaK32TljrLi1LI2+PK58sDVbL7ALdqf3VRQ==}
     engines: {node: '>=16'}
-
-  '@vscode/wasm-wasi-lsp@0.1.0-pre.6':
-    resolution: {integrity: sha512-xaxk/NMRSYeRV7V9EG7p82RJM0YvnX5doXz43mQkc2EXOHNw9F3X6uVvoLn6cQLVoqDpv7ZaDD7Ab+lY4YhYCA==}
-    engines: {node: '>=18.18.2'}
-    peerDependencies:
-      '@vscode/wasm-wasi': 0.13.0-pre.1
-      vscode-languageclient: 10.0.0-next.7
-
-  '@vscode/wasm-wasi@0.13.0-pre.1':
-    resolution: {integrity: sha512-1w3GSGjuoWA66FQ6asO1io4UmyjnmbFgi+dFrM+uUrKBJ7Wd/Y0Eac2KfBo1hickdyGWKlS4nJj3ztBkyuv//g==}
-    engines: {node: '>=16.17.1', vscode: ^1.78.0}
-    hasBin: true
 
   '@webassemblyjs/ast@1.12.1':
     resolution: {integrity: sha512-EKfMUOPRRUTy5UII4qJDGPpqfwjOmZ5jeGFwid9mnoqIFK+e0vqoi1qH56JpmZSzEL53jKnNzScdmftJyG5xWg==}
@@ -1872,16 +1854,6 @@ snapshots:
       semver: 7.6.2
     transitivePeerDependencies:
       - supports-color
-
-  '@vscode/wasm-wasi-lsp@0.1.0-pre.6(@vscode/wasm-wasi@0.13.0-pre.1)(vscode-languageclient@10.0.0-next.7)':
-    dependencies:
-      '@vscode/wasm-wasi': 0.13.0-pre.1
-      vscode-languageclient: 10.0.0-next.7
-
-  '@vscode/wasm-wasi@0.13.0-pre.1':
-    dependencies:
-      semver: 7.6.2
-      yargs: 17.7.2
 
   '@webassemblyjs/ast@1.12.1':
     dependencies:

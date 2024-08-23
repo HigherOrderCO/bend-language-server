@@ -1,13 +1,37 @@
 [package]
 name = "bend-language-server"
 version = "0.2.37-alpha.1"
+description = "Language server for the Bend programming language"
 edition = "2021"
+license-file = "LICENSE"
+repository = "https://github.com/HigherOrderCO/bend-language-server"
+homepage = "https://higherorderco.com/"
+readme = "README.md"
+keywords = ["bend", "language-server", "lsp"]
+categories = ["text-editors", "development-tools"]
+exclude = [
+    ".vscode",
+    "editors",
+    ".vscodeignore",
+    "package.json",
+    "pnpm-lock.yaml",
+    "tsconfig.json",
+    "webpack.config.js",
+]
 
 [dependencies]
-bend-lang = { git = "https://github.com/HigherOrderCO/Bend.git" }
+bend-lang = { version = "0.2.37-alpha.1" }
 tree-sitter-bend = { version = "0.2.37-alpha.1" }
 tower-lsp = { version = "0.20", features = ["proposed"] }
-tokio = { version = "1.39", features = ["sync", "macros", "io-util", "rt", "rt-multi-thread", "io-std", "time"] }
+tokio = { version = "1.39", features = [
+    "sync",
+    "macros",
+    "io-util",
+    "rt",
+    "rt-multi-thread",
+    "io-std",
+    "time",
+] }
 serde = { version = "1.0", features = ["derive"] }
 anyhow = "1.0"
 tree-sitter = "0.22"
