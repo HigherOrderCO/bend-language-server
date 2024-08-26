@@ -8,9 +8,18 @@ importers:
 
   .:
     dependencies:
+      dedent-js:
+        specifier: 1.0.1
+        version: 1.0.1
+      ts-pattern:
+        specifier: ^5.3.1
+        version: 5.3.1
       vscode-languageclient:
         specifier: 10.0.0-next.7
         version: 10.0.0-next.7
+      which:
+        specifier: ^4.0.0
+        version: 4.0.0
     devDependencies:
       '@electron/rebuild':
         specifier: ^3.6.0
@@ -24,6 +33,9 @@ importers:
       '@types/node':
         specifier: ^22.4.1
         version: 22.4.1
+      '@types/which':
+        specifier: ^3.0.4
+        version: 3.0.4
       '@typescript-eslint/eslint-plugin':
         specifier: ^8.2.0
         version: 8.2.0(@typescript-eslint/parser@8.2.0(eslint@9.7.0)(typescript@5.4.5))(eslint@9.7.0)(typescript@5.4.5)
@@ -200,6 +212,9 @@ packages:
 
   '@types/responselike@1.0.3':
     resolution: {integrity: sha512-H/+L+UkTV33uf49PH5pCAUBVPNj2nDBXTN+qS1dOwyyg24l3CcicicCA7ca+HMvJBZcFgl5r8e+RR6elsb4Lyw==}
+
+  '@types/which@3.0.4':
+    resolution: {integrity: sha512-liyfuo/106JdlgSchJzXEQCVArk0CvevqPote8F8HgWgJ3dRCcTHgJIsLDuee0kxk/mhbInzIZk3QWSZJ8R+2w==}
 
   '@typescript-eslint/eslint-plugin@8.2.0':
     resolution: {integrity: sha512-02tJIs655em7fvt9gps/+4k4OsKULYGtLBPJfOsmOq1+3cdClYiF0+d6mHu6qDnTcg88wJBkcPLpQhq7FyDz0A==}
@@ -558,6 +573,9 @@ packages:
   decompress-response@6.0.0:
     resolution: {integrity: sha512-aW35yZM6Bb/4oJlZncMH2LCoZtJXTRxES17vE3hoRiowU2kWHaJKFkSBDnDR+cm9J+9QhXmREyIfv0pji9ejCQ==}
     engines: {node: '>=10'}
+
+  dedent-js@1.0.1:
+    resolution: {integrity: sha512-OUepMozQULMLUmhxS95Vudo0jb0UchLimi3+pQ2plj61Fcy8axbP9hbiD4Sz6DPqn6XG3kfmziVfQ1rSys5AJQ==}
 
   deep-is@0.1.4:
     resolution: {integrity: sha512-oIPzksmTg4/MriiaYGO+okXDT7ztn/w3Eptv/+gSIdMdKsJo0u4CfYNFJPy+4SKMuCqGw2wxnA+URMg3t8a/bQ==}
@@ -923,6 +941,10 @@ packages:
 
   isexe@2.0.0:
     resolution: {integrity: sha512-RHxMLp9lnKHGHRng9QFhRCMbYAcVpn69smSGcq3f36xjgVVWThj4qqLbTLlq7Ssj8B+fIQ1EuCEGI2lKsyQeIw==}
+
+  isexe@3.1.1:
+    resolution: {integrity: sha512-LpB/54B+/2J5hqQ7imZHfdU31OlgQqx7ZicVlkm9kzg9/w8GKLEcFfJl/t7DCEDueOyBAD6zCCwTO6Fzs0NoEQ==}
+    engines: {node: '>=16'}
 
   jackspeak@4.0.1:
     resolution: {integrity: sha512-cub8rahkh0Q/bw1+GxP7aeSe29hHHn2V4m29nnDlvCdlgU+3UGxkZp7Z53jLUdpX3jdTO0nJZUDl3xvbWc2Xog==}
@@ -1460,6 +1482,9 @@ packages:
     peerDependencies:
       typescript: '>=4.2.0'
 
+  ts-pattern@5.3.1:
+    resolution: {integrity: sha512-1RUMKa8jYQdNfmnK4jyzBK3/PS/tnjcZ1CW0v1vWDeYe5RBklc/nquw03MEoB66hVBm4BnlCfmOqDVxHyT1DpA==}
+
   type-check@0.4.0:
     resolution: {integrity: sha512-XleUoc9uwGXqjWwXaUTZAmzMcFZ5858QA2vvx1Ur5xIcixXIP+8LnFDgRplU30us6teqdlskFfu+ae4K79Ooew==}
     engines: {node: '>= 0.8.0'}
@@ -1537,6 +1562,11 @@ packages:
   which@2.0.2:
     resolution: {integrity: sha512-BLI3Tl1TW3Pvl70l3yq3Y64i+awpwXqsGBYWkkqMtnbXgrMD+yj7rhW0kuEDxzJaYXGjEW5ogapKNMEKNMjibA==}
     engines: {node: '>= 8'}
+    hasBin: true
+
+  which@4.0.0:
+    resolution: {integrity: sha512-GlaYyEb07DPxYCKhKzplCWBJtvxZcZMrL+4UkrTSJHHPyZU4mYYTv3qaOe77H7EODLSSopAUFAc6W8U4yqvscg==}
+    engines: {node: ^16.13.0 || >=18.0.0}
     hasBin: true
 
   wide-align@1.1.5:
@@ -1763,6 +1793,8 @@ snapshots:
   '@types/responselike@1.0.3':
     dependencies:
       '@types/node': 22.4.1
+
+  '@types/which@3.0.4': {}
 
   '@typescript-eslint/eslint-plugin@8.2.0(@typescript-eslint/parser@8.2.0(eslint@9.7.0)(typescript@5.4.5))(eslint@9.7.0)(typescript@5.4.5)':
     dependencies:
@@ -2191,6 +2223,8 @@ snapshots:
     dependencies:
       mimic-response: 3.1.0
 
+  dedent-js@1.0.1: {}
+
   deep-is@0.1.4: {}
 
   defaults@1.0.4:
@@ -2573,6 +2607,8 @@ snapshots:
   isarray@1.0.0: {}
 
   isexe@2.0.0: {}
+
+  isexe@3.1.1: {}
 
   jackspeak@4.0.1:
     dependencies:
@@ -3135,6 +3171,8 @@ snapshots:
     dependencies:
       typescript: 5.4.5
 
+  ts-pattern@5.3.1: {}
+
   type-check@0.4.0:
     dependencies:
       prelude-ls: 1.2.1
@@ -3227,6 +3265,10 @@ snapshots:
   which@2.0.2:
     dependencies:
       isexe: 2.0.0
+
+  which@4.0.0:
+    dependencies:
+      isexe: 3.1.1
 
   wide-align@1.1.5:
     dependencies:

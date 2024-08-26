@@ -1,96 +1,126 @@
 {
-    "name": "bend-language-server",
-    "description": "Language server for the Bend programming language",
-    "license": "MIT",
-    "version": "0.1.0",
-    "categories": [],
-    "keywords": [
-      "bend",
-      "language-server",
-      "bend-language-server",
-      "bend-lsp"
+  "name": "bend-language-server",
+  "description": "Language server for the Bend programming language",
+  "license": "MIT",
+  "version": "0.1.0",
+  "categories": [],
+  "keywords": [
+    "bend",
+    "language-server",
+    "bend-language-server",
+    "bend-lsp"
+  ],
+  "repository": {
+    "url": "https://github.com/HigherOrderCO/bend-language-server"
+  },
+  "engines": {
+    "vscode": "^1.66.0"
+  },
+  "enabledApiProposals": [],
+  "activationEvents": [
+    "onLanguage:bend"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "languages": [
+      {
+        "id": "bend",
+        "extensions": [
+          ".bend"
+        ],
+        "configuration": "editors/code/syntaxes/language-configuration.json"
+      }
     ],
-    "repository": {
-      "url": "https://github.com/HigherOrderCO/bend-language-server"
-    },
-    "engines": {
-      "vscode": "^1.66.0"
-    },
-    "enabledApiProposals": [],
-    "activationEvents": [
-      "onLanguage:bend"
-    ],
-    "main": "./dist/extension.js",
-    "contributes": {
-      "languages": [
-        {
-          "id": "bend",
-          "extensions": [
-            ".bend"
+    "configuration": {
+      "type": "object",
+      "title": "bend-language-server",
+      "properties": {
+        "bend-language-server.trace.server": {
+          "type": "string",
+          "scope": "window",
+          "enum": [
+            "off",
+            "messages",
+            "verbose"
           ],
-          "configuration": "editors/code/syntaxes/language-configuration.json"
+          "enumDescriptions": [
+            "No traces",
+            "Error only",
+            "Full log"
+          ],
+          "default": "off",
+          "description": "Traces the communication between VS Code and the language server."
+        },
+        "bend.manageLanguageServer": {
+          "scope": "resource",
+          "type": "string",
+          "default": "automatic",
+          "markdownDescription": "Manager for the `bend-language-server` binary. Can be overridden by `'serverExecutablePath'`",
+          "enum": [
+            "automatic",
+            "PATH"
+          ],
+          "markdownEnumDescriptions": [
+            "Automatically download and compile the newest version of `bend-language-server`.",
+            "Get `bend-language-server` from the PATH environment variable."
+          ]
+        },
+        "bend.serverExecutablePath": {
+          "scope": "machine-overridable",
+          "type": "string",
+          "default": "",
+          "markdownDeprecationMessage": "Manually set a language server executable location."
+        },
+        "bend.cargoExecutablePath": {
+          "scope": "resource",
+          "type": "string",
+          "default": "",
+          "markdownDescription": "Manually set a Cargo executable path."
         }
-      ],
-      "configuration": {
-        "type": "object",
-        "title": "bend-language-server",
-        "properties": {
-          "bend-language-server.trace.server": {
-            "type": "string",
-            "scope": "window",
-            "enum": [
-              "off",
-              "messages",
-              "verbose"
-            ],
-            "enumDescriptions": [
-              "No traces",
-              "Error only",
-              "Full log"
-            ],
-            "default": "off",
-            "description": "Traces the communication between VS Code and the language server."
-          }
-        }
-      },
-      "grammars": [
-        {
-          "language": "bend",
-          "scopeName": "source.bend",
-          "path": "editors/code/syntaxes/bend.tmLanguage.json"
-        }
-      ]
+      }
     },
-    "scripts": {
-      "postinstall": "cd editors/code && pnpm i",
-      "vscode:prepublish": "npm run esbuild-base -- --minify",
-      "test-compile": "tsc -p ./",
-      "compile": "cross-env NODE_ENV=production tsc -b",
-      "watch": "rm -rf dist && tsc -b -w",
-      "lint": "eslint src --ext ts",
-      "pretest": "npm run compile && npm run lint",
-      "test": "node ./out/test/runTest.js",
-      "build": "webpack --config webpack.config.js",
-      "package": "vsce package --no-dependencies",
-      "publish": "vsce publish --no-dependencies"
-    },
-    "devDependencies": {
-      "@types/glob": "^8.1.0",
-      "@types/mocha": "^10.0.7",
-      "@types/node": "^22.4.1",
-      "@typescript-eslint/eslint-plugin": "^8.2.0",
-      "@typescript-eslint/parser": "^8.2.0",
-      "@electron/rebuild": "^3.6.0",
-      "@vscode/test-electron": "^2.4.1",
-      "vscode-uri": "^3.0.2",
-      "cross-env": "^7.0.2",
-      "eslint": "^9.7.0",
-      "glob": "^11.0.0",
-      "mocha": "^10.6.0",
-      "typescript": "5.4.5",
-      "webpack": "^5.82.1"
-    },
-    "dependencies": {
-      "vscode-languageclient": "10.0.0-next.7"
-    }
+    "grammars": [
+      {
+        "language": "bend",
+        "scopeName": "source.bend",
+        "path": "editors/code/syntaxes/bend.tmLanguage.json"
+      }
+    ]
+  },
+  "scripts": {
+    "postinstall": "cd editors/code && pnpm i",
+    "vscode:prepublish": "npm run esbuild-base -- --minify",
+    "test-compile": "tsc -p ./",
+    "compile": "cross-env NODE_ENV=production tsc -b",
+    "watch": "rm -rf dist && tsc -b -w",
+    "lint": "eslint src --ext ts",
+    "pretest": "npm run compile && npm run lint",
+    "test": "node ./out/test/runTest.js",
+    "build": "webpack --config webpack.config.js",
+    "package": "vsce package --no-dependencies",
+    "publish": "vsce publish --no-dependencies"
+  },
+  "devDependencies": {
+    "@types/glob": "^8.1.0",
+    "@types/mocha": "^10.0.7",
+    "@types/node": "^22.4.1",
+    "@types/which": "^3.0.4",
+    "@typescript-eslint/eslint-plugin": "^8.2.0",
+    "@typescript-eslint/parser": "^8.2.0",
+    "@electron/rebuild": "^3.6.0",
+    "@vscode/test-electron": "^2.4.1",
+    "vscode-uri": "^3.0.2",
+    "cross-env": "^7.0.2",
+    "eslint": "^9.7.0",
+    "glob": "^11.0.0",
+    "mocha": "^10.6.0",
+    "typescript": "5.4.5",
+    "webpack": "^5.82.1"
+  },
+  "dependencies": {
+    "vscode-languageclient": "10.0.0-next.7",
+    "which": "^4.0.0",
+    "dedent-js": "1.0.1",
+    "ts-pattern": "^5.3.1"
   }
+}
