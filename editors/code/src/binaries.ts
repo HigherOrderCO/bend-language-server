@@ -18,6 +18,7 @@ import * as os from "os";
 import which from "which";
 import dedent from "dedent-js";
 import path from "path";
+// Note: if we keep using `fp-ts`, we should probably use this
 import * as TE from "fp-ts/lib/TaskEither";
 import * as E from "fp-ts/lib/Either";
 import { pipe } from "fp-ts/lib/function";
@@ -48,7 +49,6 @@ export interface IEnvVars {
 export async function findLanguageServer(
   context: ExtensionContext,
   logger: Logger,
-  workingDir: string,
   folder?: WorkspaceFolder
 ): Promise<E.Either<string, string>> {
   logger.info("Looking for the language server");
@@ -110,9 +110,12 @@ export async function findLanguageServer(
     let languageServer = await managedServerExecutableLocation(context);
     if (!executableExists(languageServer)) {
       // Install the `bend-language-server` binary.
-      return pipe(
+      return await pipe(
         await getLanguageServerLatestVersion(context, logger),
-        E.chain(version => installLanguageServer(version, context, logger))
+        E.match(
+          async error => E.left(error),
+          async version => await installLanguageServer(version, context, logger)
+        )
       )
     } else {
       // Check if latest version is installed.
@@ -190,15 +193,16 @@ async function askToUpdateLanguageServer(languageServer: string, version: string
 }
 
 async function installLanguageServer(version: string, context: ExtensionContext, logger: Logger): Promise<E.Either<string, string>> {
-  return pipe(
+  return await pipe(
     await callCargo(
-      [BEND_LS_EXE, "--version", version, "--root", await getStoragePath(context)],
+      ["install", BEND_LS_EXE, "--version", version, "--root", await getStoragePath(context)],
       context,
       logger,
       "Installing the Bend Language Server...",
       true
     ),
-    E.chain(
+    E.match(
+      async error => E.left(error),
       async _output => E.right(await managedServerExecutableLocation(context))
     )
   );

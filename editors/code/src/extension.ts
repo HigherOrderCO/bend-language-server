@@ -29,10 +29,20 @@ import {
   Executable,
   LanguageClient,
   LanguageClientOptions,
+  Logger,
+  NullLogger,
   ServerOptions,
 } from "vscode-languageclient/node";
 
+import { pipe } from "fp-ts/lib/function";
+import * as E from "fp-ts/Either";
+
+import { findLanguageServer } from "./binaries";
+
 let client: LanguageClient;
+
+// ===================
+// Main extension code
 
 export async function activate(context: ExtensionContext) {
   // let disposable = commands.registerCommand("helloworld.helloWorld", async uri => {
@@ -48,37 +58,30 @@ export async function activate(context: ExtensionContext) {
   // });
   // context.subscriptions.push(disposable);
 
+  const logger: Logger = NullLogger; // FIXME
   const traceOutputChannel = window.createOutputChannel("Bend Language Server trace");
-  const command = process.env.SERVER_PATH || "bend-language-server";
+  const command = process.env.SERVER_PATH || pipe(
+    await findLanguageServer(context, logger),
+    E.match(
+      error => { throw new Error(`Could not find language server: ${error}`); },
+      languageServer => languageServer
+    )
+  );
 
   // We have to check if `bend-language-server` is installed, and if it's not, try to install it.
 
   const run: Executable = {
     command,
-    options: {
-      env: {
-        ...process.env,
-        RUST_LOG: "info",
-      },
-    },
+    options: { env: { ...process.env, RUST_LOG: "info" } }
   };
+
   const debug: Executable = {
     command,
-    options: {
-      env: {
-        ...process.env,
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        RUST_LOG: "debug",
-      },
-    },
+    options: { env: { ...process.env, RUST_LOG: "debug" } }
   };
-  const serverOptions: ServerOptions = {
-    run,
-    debug,
-  };
-  // If the extension is launched in debug mode then the debug server options are used
-  // Otherwise the run options are used
-  // Options to control the language client
+
+  const serverOptions: ServerOptions = { run, debug, };
+
   let clientOptions: LanguageClientOptions = {
     // Register the server for plain text documents
     documentSelector: [{ scheme: "file", language: "bend" }],
@@ -101,6 +104,9 @@ export function deactivate(): Thenable<void> | undefined {
   }
   return client.stop();
 }
+
+// ================
+// Future additions
 
 export function activateInlayHints(ctx: ExtensionContext) {
   const maybeUpdater = {
