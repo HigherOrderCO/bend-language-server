@@ -37,6 +37,8 @@ cargo install bend-language-server --version 0.2.37-alpha.2
 
 If the toolchain is correctly installed, `bend-language-server` should now be in your path.
 
+We also have a [tree-sitter grammar](https://github.com/HigherOrderCO/tree-sitter-bend) for syntax highlighting with configuration instructions for Neovim.
+
 ## Development
 
 Currently, the language server is only developed and tested for VSCode. Feel free to add contributions specific to other code editors!
