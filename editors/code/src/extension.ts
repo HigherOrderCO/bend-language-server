@@ -60,8 +60,7 @@ export async function activate(context: ExtensionContext) {
 
   const logger: Logger = NullLogger; // FIXME
   const traceOutputChannel = window.createOutputChannel("Bend Language Server trace");
-
-  traceOutputChannel.appendLine(context.globalStorageUri.fsPath);
+  traceOutputChannel.appendLine(`Local file storage: ${context.globalStorageUri.fsPath}`);
 
   // We have to check if `bend-language-server` is installed, and if it's not, try to install it.
   const command = process.env.BEND_LS_PATH || pipe(
