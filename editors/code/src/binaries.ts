@@ -58,7 +58,7 @@ export async function findLanguageServer(
     .get("serverExecutablePath") as string;
 
   if (serverExecutablePath) {
-    // Get the language server from the configured location
+    // Get the language server from a pre-configured location
     return await findConfiguredServerExecutable(logger, folder);
   }
 
@@ -95,7 +95,17 @@ export async function findLanguageServer(
 
   // User wants us to grab `bend-language-server` from the PATH environment variable
   if (manageLS == "PATH") {
-    return await findExecutableInPATH(BEND_LS_EXE, context, logger);
+    return pipe(
+      await findExecutableInPATH(BEND_LS_EXE, context, logger),
+      E.mapLeft(
+        error => {
+          // If PATH management failed, ask management type again on next startup to mitigate misclicks.
+          // This might be annoying. It could be worthwhile to revisit this decision in the future.
+          context.globalState.update("pluginInitialized", null);
+          return error;
+        }
+      )
+    );
   }
 
   // Automatically install the latest `bend-language-server` binary.
@@ -318,7 +328,7 @@ async function findCargo(_context: ExtensionContext, logger: Logger, folder?: Wo
   `);
 }
 
-async function  callCargo(
+async function callCargo(
   args: string[],
   context: ExtensionContext,
   logger: Logger,
