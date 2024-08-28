@@ -306,7 +306,7 @@ async function findCargo(_context: ExtensionContext, logger: Logger, folder?: Wo
   // We'll try to find the cargo binary by looking around
   logger.info("Probing for Cargo...");
 
-  cargoExecutable = path.join(process.env.CARGO_HOME, ".cargo", "bin", "cargo");
+  cargoExecutable = path.join(process.env.CARGO_HOME, "bin", "cargo");
   if (executableExists(cargoExecutable)) return E.right(cargoExecutable);
 
   cargoExecutable = path.join(os.homedir(), ".cargo", "bin", "cargo");
