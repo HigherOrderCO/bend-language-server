@@ -113,15 +113,18 @@ export async function findLanguageServer(
       // Check if latest version is installed.
       const newVersion = await getLanguageServerLatestVersion(context, logger);
 
-      const currentVersion =
-        (await callAsync(
+      const currentVersion = pipe(
+        await callAsync(
           languageServer,
           ["--version"],
           logger,
           undefined,
           "Checking current installed version...",
           true
-        )).trim();
+        ),
+        E.map(output => output.trim()),
+        E.getOrElse((_output) => "" /* empty version */)
+      )
 
       return await pipe(
         newVersion,
@@ -331,7 +334,7 @@ async function callCargo(
     await findCargo(context, logger),
     E.match(
       async (error) => E.left(error),
-      async (cargo) => E.right(
+      async (cargo) =>
         await callAsync(
           cargo,
           args,
@@ -341,12 +344,29 @@ async function callCargo(
           cancellable,
           {},
           callback
-        ))
+        )
     )
   )
 }
 
 async function callAsync(
+  executablePath: string,
+  args: string[],
+  logger: Logger,
+  dir?: string,
+  title?: string,
+  cancellable?: boolean,
+  envAdd?: IEnvVars,
+  callback?: ProcessCallback
+): Promise<E.Either<string, string>> {
+  try {
+    return E.right(await callAsyncThrowable(executablePath, args, logger, dir, title, cancellable, envAdd, callback));
+  } catch (e) {
+    return E.left(e);
+  }
+}
+
+async function callAsyncThrowable(
   executablePath: string,
   args: string[],
   logger: Logger,
