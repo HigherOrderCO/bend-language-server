@@ -17,7 +17,7 @@ We accept contributions and feature requests!
 
 ### VSCode extension
 
-As of this alpha version, we still don't publish compiled releases of the language server, so you'll need to install the [Rust toolchain](https://rustup.rs). Afterwards, install the VSCode extension and open a `.bend` file.
+As of this alpha version, we still don't publish compiled releases of the language server, so you'll need to install the [Rust toolchain](https://rustup.rs) to compile it. Afterwards, install the VSCode extension and open a `.bend` file.
 
 On startup, the extension will ask you if you want it to automatically install the language server executable or if you want to set it up manually with the PATH environment variable. If you choose automatically, the extension will use `cargo` to install it to its local storage. If you want to install it manually, run the following command:
 
