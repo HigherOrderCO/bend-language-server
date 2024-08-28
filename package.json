@@ -69,7 +69,7 @@
           "scope": "machine-overridable",
           "type": "string",
           "default": "",
-          "markdownDeprecationMessage": "Manually set a language server executable location."
+          "markdownDescription": "Manually set a language server executable location."
         },
         "bend.cargoExecutablePath": {
           "scope": "resource",

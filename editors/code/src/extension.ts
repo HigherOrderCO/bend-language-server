@@ -1,7 +1,7 @@
 /* --------------------------------------------------------------------------------------------
  * Copyright (c) Higher Order Company (2024)
- * Based on original code by Microsoft Corporation.
- * Licensed under the MIT License. See LICENSE in the project root for license information.
+ * Based on original code by Microsoft Corporation under the MIT License.
+ * Licensed under the MIT License. See LICENSE in the project root for information.
  * ------------------------------------------------------------------------------------------ */
 
 import {
@@ -60,15 +60,17 @@ export async function activate(context: ExtensionContext) {
 
   const logger: Logger = NullLogger; // FIXME
   const traceOutputChannel = window.createOutputChannel("Bend Language Server trace");
-  const command = process.env.SERVER_PATH || pipe(
+
+  traceOutputChannel.appendLine(context.globalStorageUri.fsPath);
+
+  // We have to check if `bend-language-server` is installed, and if it's not, try to install it.
+  const command = process.env.BEND_LS_PATH || pipe(
     await findLanguageServer(context, logger),
     E.match(
-      error => { throw new Error(`Could not find language server: ${error}`); },
+      error => { throw new Error(error); },
       languageServer => languageServer
     )
   );
-
-  // We have to check if `bend-language-server` is installed, and if it's not, try to install it.
 
   const run: Executable = {
     command,
@@ -87,6 +89,7 @@ export async function activate(context: ExtensionContext) {
     documentSelector: [{ scheme: "file", language: "bend" }],
     synchronize: {
       // Notify the server about file changes to '.clientrc files contained in the workspace
+      // (we don't care about this for now, it was part of the boilerplate)
       fileEvents: workspace.createFileSystemWatcher("**/.clientrc"),
     },
     traceOutputChannel,

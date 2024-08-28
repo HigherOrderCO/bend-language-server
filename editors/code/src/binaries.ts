@@ -2,7 +2,7 @@
  * Copyright (c) Higher Order Company (2024)
  * Licensed under the MIT License. See LICENSE in the project root for license information.
  * 
- * This entire file is based on the Haskell VSCode extension (https://github.com/haskell/vscode-haskell),
+ * This file is based on the Haskell VSCode extension (https://github.com/haskell/vscode-haskell),
  * which is also licensed under the MIT license.
  * ------------------------------------------------------------------------------------------ */
 
@@ -12,12 +12,12 @@ import { ConfigurationTarget, ExtensionContext, ProgressLocation, window, worksp
 import { Logger } from "vscode-languageclient";
 import { match } from 'ts-pattern';
 import { execPath } from "process";
-import * as child_process from 'child_process';
-import * as fs from "fs";
-import * as os from "os";
 import which from "which";
 import dedent from "dedent-js";
 import path from "path";
+import * as child_process from 'child_process';
+import * as fs from "fs";
+import * as os from "os";
 // Note: if we keep using `fp-ts`, we should probably use this
 import * as TE from "fp-ts/lib/TaskEither";
 import * as E from "fp-ts/lib/Either";
@@ -56,13 +56,14 @@ export async function findLanguageServer(
   let serverExecutablePath = workspace
     .getConfiguration("bend")
     .get("serverExecutablePath") as string;
+
   if (serverExecutablePath) {
     // Get the language server from the configured location
     return await findConfiguredServerExecutable(logger, folder);
   }
 
+  // Create local file storage for the extension
   const storagePath = await getStoragePath(context);
-
   if (!fs.existsSync(storagePath)) {
     fs.mkdirSync(storagePath);
   }
@@ -70,7 +71,7 @@ export async function findLanguageServer(
   // First initialization, ask the user how they want to manage the language server
   if (!context.globalState.get("pluginInitialized") as boolean | null) {
     const message =
-      "How would you like to manage the Bend Language Server binary?";
+      "How would you like to manage the Bend Language Server executable?";
 
     const popup = window.showInformationMessage(
       message,
@@ -84,7 +85,7 @@ export async function findLanguageServer(
       .with("Automatically (compile via Cargo)", () => manageLS = "automatic")
       .with("Manually via PATH environment variable", () => manageLS = "PATH")
       .otherwise(() => {
-        window.showWarningMessage("Choosing to install the Bend Language Server automatically via Cargo.")
+        window.showWarningMessage("Choosing to install the Bend Language Server automatically via Cargo")
         manageLS = "automatic";
       });
 
@@ -101,23 +102,14 @@ export async function findLanguageServer(
   if (manageLS == "automatic") {
     // -> check if installed locally
     //   -> yes: check if latest version
-    //     -> yes: ask to update
+    //     -> yes: just run
+    //     -> no: ask to update
     //       -> yes: update and run
     //       -> no: just run
-    //     -> no: just run
     //   -> no: install and run
 
     let languageServer = await managedServerExecutableLocation(context);
-    if (!executableExists(languageServer)) {
-      // Install the `bend-language-server` binary.
-      return await pipe(
-        await getLanguageServerLatestVersion(context, logger),
-        E.match(
-          async error => E.left(error),
-          async version => await installLanguageServer(version, context, logger)
-        )
-      )
-    } else {
+    if (executableExists(languageServer)) {
       // Check if latest version is installed.
       const newVersion = await getLanguageServerLatestVersion(context, logger);
 
@@ -131,7 +123,8 @@ export async function findLanguageServer(
           true
         )).trim();
 
-      return await pipe(newVersion,
+      return await pipe(
+        newVersion,
         E.match(
           async _error => {
             // We couldn't find the newest version for some reason...
@@ -146,11 +139,20 @@ export async function findLanguageServer(
             }
           }
         )
+      );
+    } else {
+      // Install the `bend-language-server` binary.
+      return await pipe(
+        await getLanguageServerLatestVersion(context, logger),
+        E.match(
+          async error => E.left(error),
+          async version => await installLanguageServer(version, context, logger)
+        )
       )
     }
   }
 
-  return E.left("Invalid configuration for managing the Bend Language Server.");
+  return E.left("Invalid configuration for managing the Bend Language Server");
 }
 
 async function managedServerExecutableLocation(context: ExtensionContext): Promise<string> {
@@ -182,14 +184,14 @@ async function askToUpdateLanguageServer(languageServer: string, version: string
     "No"
   );
 
-  if (decision == "No") {
-    return E.right(languageServer);
+  if (decision == "Yes") {
+    // Update the language server
+    logger.info(`Installing bend-language-server ${version}`);
+    return await installLanguageServer(version, context, logger);
   }
 
-  // Update the language server
-  logger.info(`Installing bend-language-server ${version}`);
-
-  return await installLanguageServer(version, context, logger);
+  // Assume the decision was "No"
+  return E.right(languageServer);
 }
 
 async function installLanguageServer(version: string, context: ExtensionContext, logger: Logger): Promise<E.Either<string, string>> {
@@ -198,7 +200,7 @@ async function installLanguageServer(version: string, context: ExtensionContext,
       ["install", BEND_LS_EXE, "--version", version, "--root", await getStoragePath(context)],
       context,
       logger,
-      "Installing the Bend Language Server...",
+      "Installing the Bend Language Server... This might take a while.",
       true
     ),
     E.match(
@@ -220,8 +222,8 @@ async function findConfiguredServerExecutable(logger: Logger, folder?: Workspace
   } else {
     return E.left(dedent`
       Could not find the Bend Language Server at ${execPath}.
-      Consider changing settings for "bend.manageLanguageServer" or "bend.serverExecutablePath".
-      `);
+      Consider changing settings for "bend.serverExecutablePath" and "bend.manageLanguageServer".
+    `);
   }
 }
 
@@ -229,7 +231,7 @@ async function findExecutableInPATH(executable: string, _context: ExtensionConte
   if (executableExists(executable)) {
     return E.right(executable);
   } else {
-    return E.left(`Could not find ${executable} in PATH.`)
+    return E.left(`Could not find ${executable} in PATH`)
   }
 }
 
@@ -307,7 +309,10 @@ async function findCargo(_context: ExtensionContext, logger: Logger, folder?: Wo
   cargoExecutable = path.join(os.homedir(), ".cargo", "bin", "cargo");
   if (executableExists(cargoExecutable)) return E.right(cargoExecutable);
 
-  return E.left("Could not find the Cargo binary.");
+  return E.left(dedent`
+    Could not find the Cargo toolchain.
+    Try installing it through rustup (https://rustup.rs) or setting its path through the "bend.cargoExecutablePath" configuration
+  `);
 }
 
 async function callCargo(
@@ -319,10 +324,10 @@ async function callCargo(
   callback?: ProcessCallback
 ): Promise<E.Either<string, string>> {
   if (manageLS !== "automatic") {
-    return E.left("Tried to call Cargo when bend.manageLanguageServer is not set to automatic.");
+    return E.left("Tried to call Cargo when bend.manageLanguageServer is not set to automatic");
   }
 
-  return pipe(
+  return await pipe(
     await findCargo(context, logger),
     E.match(
       async (error) => E.left(error),
@@ -388,7 +393,7 @@ async function callAsync(
               } else {
                 if (err) {
                   reject(
-                    Error(`\`${command}\` exited with exit code ${err.code}.`)
+                    Error(`\`${command}\` exited with exit code ${err.code}`)
                   );
                 } else {
                   resolve(stdout?.trim());

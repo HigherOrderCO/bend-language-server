@@ -18,7 +18,7 @@
           "script": "watch"
         },
         "env": {
-          "SERVER_PATH": "${workspaceRoot}/target/debug/bend-language-server"
+          "BEND_LS_PATH": "${workspaceRoot}/target/debug/bend-language-server"
         }
       },
       // {
