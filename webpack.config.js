@@ -6,7 +6,7 @@ const path = require("path");
 
 /**@type {import('webpack').Configuration}*/
 const config = {
-	target: "webworker", // vscode extensions run in webworker context for VS Code web 📖 -> https://webpack.js.org/configuration/target/#target
+	target: "node", // vscode extensions run in webworker context for VS Code web 📖 -> https://webpack.js.org/configuration/target/#target
 
 	entry: "./editors/code/src/extension.ts", // the entry point of this extension, 📖 -> https://webpack.js.org/configuration/entry-context/
 	output: {
@@ -25,7 +25,6 @@ const config = {
 		// support reading TypeScript and JavaScript files, 📖 -> https://github.com/TypeStrong/ts-loader
 		mainFields: ["browser", "module", "main"], // look for `browser` entry point in imported node modules
 		extensions: [".ts", ".js"],
-		alias: {},
 	},
 	module: {
 		rules: [
@@ -39,6 +38,6 @@ const config = {
 				],
 			},
 		],
-	},
+	}
 };
 module.exports = config;

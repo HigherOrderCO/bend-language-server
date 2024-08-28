@@ -1,15 +1,27 @@
 {
-	"name": "bend-lang-client",
-	"description": "VSCode extension for the Bend Language Server",
-	"license": "MIT",
-	"version": "0.1.0",
-	"engines": {
-		"vscode": "^1.85.0"
-	},
-	"dependencies": {},
-	"devDependencies": {
-		"@types/node": "^22.4.1",
-		"@types/vscode": "1.86.0",
-		"@vscode/test-electron": "^2.4.1"
-	}
+  "name": "bend-language-extension",
+  "description": "VSCode extension for the Bend Language Server",
+  "publisher": "HigherOrderCompany",
+  "license": "MIT",
+  "version": "0.2.37-alpha.1",
+  "categories": [],
+  "icon": "../../icon/bend.png",
+  "keywords": [
+    "bend",
+    "language-server",
+    "bend-language-server",
+    "bend-lsp"
+  ],
+  "repository": {
+    "url": "https://github.com/HigherOrderCO/bend-language-server"
+  },
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@types/node": "^22.4.1",
+    "@types/vscode": "1.86.0",
+    "@vscode/test-electron": "^2.4.1"
+  }
 }
