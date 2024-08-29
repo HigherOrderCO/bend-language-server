@@ -3,7 +3,7 @@
   "description": "Language server for the Bend programming language",
   "publisher": "HigherOrderCompany",
   "license": "MIT",
-  "version": "0.2.37-alpha.1",
+  "version": "0.2.37",
   "categories": [],
   "icon": "icon/bend.png",
   "keywords": [
@@ -18,7 +18,6 @@
   "engines": {
     "vscode": "^1.66.0"
   },
-  "enabledApiProposals": [],
   "activationEvents": [
     "onLanguage:bend"
   ],
@@ -112,7 +111,9 @@
     "test": "node ./out/test/runTest.js",
     "build": "webpack --config webpack.config.js",
     "package": "vsce package --no-dependencies",
-    "publish": "vsce publish --no-dependencies"
+    "publish": "vsce publish --no-dependencies",
+    "package-pre-release": "vsce package --pre-release --no-dependencies",
+    "publish-pre-release": "vsce publish --pre-release --no-dependencies"
   },
   "devDependencies": {
     "@electron/rebuild": "^3.6.0",
