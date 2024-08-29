@@ -81,6 +81,18 @@
         }
       }
     },
+    "commands": [
+      {
+        "command": "bend.commands.restartServer",
+        "title": "Bend: Restart Language Server",
+        "description": "Restarts the Bend language server extension"
+      },
+      {
+        "command": "bend.commands.stopServer",
+        "title": "Bend: Stop Language Server",
+        "description": "Stops the Bend language server extension"
+      }
+    ],
     "grammars": [
       {
         "language": "bend",

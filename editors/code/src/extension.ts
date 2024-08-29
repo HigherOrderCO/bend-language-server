@@ -7,6 +7,7 @@
 import {
   languages,
   workspace,
+  commands,
   EventEmitter,
   ExtensionContext,
   window,
@@ -17,7 +18,6 @@ import {
   InlayHint,
   TextDocumentChangeEvent,
   ProviderResult,
-  commands,
   WorkspaceEdit,
   TextEdit,
   Selection,
@@ -61,6 +61,23 @@ export async function activate(context: ExtensionContext) {
   const logger: Logger = NullLogger; // FIXME
   const traceOutputChannel = window.createOutputChannel("Bend Language Server trace");
   traceOutputChannel.appendLine(`Local file storage: ${context.globalStorageUri.fsPath}`);
+
+  // Register editor commands
+  const restartCommand = commands.registerCommand("bend.commands.restartServer", async () => {
+    if (client.isRunning()) {
+      client.info("Stopping the language server.");
+      await client.stop();
+    }
+    client.info("Starting the language server.");
+    await client.start();
+  });
+  context.subscriptions.push(restartCommand);
+
+  const stopCommand = commands.registerCommand("bend.commands.stopServer", async () => {
+    client.info("Stopping the language server.");
+    await client.stop();
+  });
+  context.subscriptions.push(stopCommand);
 
   // We have to check if `bend-language-server` is installed, and if it's not, try to install it.
   const command = process.env.BEND_LS_PATH || pipe(
