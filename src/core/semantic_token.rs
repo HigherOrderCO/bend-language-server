@@ -53,8 +53,8 @@ lazy_static::lazy_static! {
 
     /// Translate indices from `HIGHLIGHT_NAMES` to indices from `LEGEND_TOKEN_TYPE`.
     pub static ref HIGHLIGHT_INDEX_TO_LSP_INDEX: HashMap<usize, usize> = {
-        let token_type_index: HashMap<_, _> = LEGEND_TOKEN_TYPE.iter().enumerate().map(|(i, v)| (v.clone(), i)).collect();
-        let highlight_index: HashMap<_, _> = HIGHLIGHT_NAMES.iter().enumerate().map(|(i, v)| (v, i)).collect();
+        let token_type_index: HashMap<SemanticTokenType, usize> = LEGEND_TOKEN_TYPE.iter().enumerate().map(|(i, v)| (v.clone(), i)).collect();
+        let highlight_index: HashMap<&&str, usize> = HIGHLIGHT_NAMES.iter().enumerate().map(|(i, v)| (v, i)).collect();
         NAME_TO_TOKEN_TYPE.iter().map(|(key, val)| (highlight_index[key], token_type_index[val])).collect()
     };
 
@@ -158,7 +158,8 @@ fn make_semantic_token(
     Some(SemanticToken {
         delta_line,
         delta_start,
-        length: (range.end - range.start) as u32,
+        // Multi-byte chars like `λ` need to be treated as a single char
+        length: code.byte_slice(range).chars().count() as u32,
         token_type,
         token_modifiers_bitset: 0,
     })
