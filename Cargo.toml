@@ -21,7 +21,7 @@ exclude = [
 
 [dependencies]
 bend-lang = { version = "0.2.37-alpha.1" }
-tree-sitter-bend = { version = "0.2.37-alpha.2" }
+tree-sitter-bend = { version = "0.2.37-alpha.3" }
 tower-lsp = { version = "0.20", features = ["proposed"] }
 tokio = { version = "1.39", features = [
     "sync",

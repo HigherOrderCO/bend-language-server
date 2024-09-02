@@ -1021,9 +1021,9 @@ dependencies = [
 
 [[package]]
 name = "tree-sitter-bend"
-version = "0.2.37-alpha.2"
+version = "0.2.37-alpha.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bd056d448995c4da938f6696194e379e86eea3445fa7013c056a8925af5f1c11"
+checksum = "d3e239401e04394ea924b686a8a5ab18eebe00f674b7a8901b6a5aed19a00a0c"
 dependencies = [
  "cc",
  "tree-sitter",

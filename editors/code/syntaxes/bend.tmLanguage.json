@@ -6,15 +6,12 @@
   ],
   "patterns": [
     {
-      "name": "comment.line",
-      "begin": "#",
-      "end": "\n",
-      "patterns": [
-        {
-          "name": "keyword.control.BEND",
-          "match": "TODO\\:"
-        }
-      ]
+      "name": "comment.block.bend",
+      "match": "#{([^#]|#[^}])*#}"
+    },
+    {
+      "name": "comment.line.bend",
+      "match": "#(\\+(.|\r?\n)|[^\\\n])*"
     },
     {
       "include": "#operators"

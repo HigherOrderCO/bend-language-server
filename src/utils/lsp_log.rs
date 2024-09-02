@@ -32,3 +32,11 @@ macro_rules! log {
     };
 }
 pub(crate) use log;
+
+macro_rules! debug {
+    ($client:expr, $($arg:tt)+) => {
+        #[cfg(debug_assertions)]
+        $client.log_message(tower_lsp::lsp_types::MessageType::INFO, format!($($arg)+)).await;
+    };
+}
+pub(crate) use debug;

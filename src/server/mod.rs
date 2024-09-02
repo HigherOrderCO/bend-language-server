@@ -141,6 +141,7 @@ impl LanguageServer for Backend {
 
         let token_amount = semantic_tokens.as_ref().map(|ts| ts.len()).unwrap_or(0);
         lsp_log::info!(self.client, "got {} tokens", token_amount);
+        lsp_log::debug!(self.client, "tokens: {:?}", semantic_tokens);
 
         Ok(semantic_tokens.map(|tokens| {
             lsp::SemanticTokensRangeResult::Tokens(lsp::SemanticTokens {
