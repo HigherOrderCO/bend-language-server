@@ -1,6 +1,6 @@
 [package]
 name = "bend-language-server"
-version = "0.2.37-alpha.3"
+version = "0.2.37-alpha.4"
 description = "Language server for the Bend programming language"
 edition = "2021"
 license-file = "LICENSE"

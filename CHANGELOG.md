@@ -11,6 +11,12 @@ and both this changelog and the crate's versioning scheme follow what the
 
 All current features are yet unreleased on a stable version, and are only available in the `0.2.37` alpha versions.
 
+## [0.2.37-alpha.4] - 2024-09-02
+
+### Fixed
+
+- Multi-byte characters highlighting other characters
+
 ## [0.2.37-alpha.3] - 2024-08-30
 
 ### Added
