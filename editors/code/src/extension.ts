@@ -45,19 +45,6 @@ let client: LanguageClient;
 // Main extension code
 
 export async function activate(context: ExtensionContext) {
-  // let disposable = commands.registerCommand("helloworld.helloWorld", async uri => {
-  //   // The code you place here will be executed every time your command is executed
-  //   // Display a message box to the user
-  //   let document = await workspace.openTextDocument(uri);
-  //   await window.showTextDocument(document);
-  //   // console.log(uri)
-  //   window.activeTextEditor.document
-  //   let editor = window.activeTextEditor;
-  //   let range = new Range(1, 1, 1, 1)
-  //   editor.selection = new Selection(range.start, range.end);
-  // });
-  // context.subscriptions.push(disposable);
-
   const logger: Logger = NullLogger; // FIXME
   const traceOutputChannel = window.createOutputChannel("Bend Language Server trace");
   traceOutputChannel.appendLine(`Local file storage: ${context.globalStorageUri.fsPath}`);

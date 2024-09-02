@@ -1,6 +1,7 @@
 # Changelog
 
-All notable changes to this project will be documented in this file.
+All notable changes to the `bend-language-server` Rust project will be documented in this file.
+To see changes related to the VSCode extension, see [editors/code/CHANGELOG.md](./editors/code/CHANGELOG.md).
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and both this changelog and the crate's versioning scheme follow what the
@@ -9,6 +10,22 @@ and both this changelog and the crate's versioning scheme follow what the
 ## [Unreleased]
 
 All current features are yet unreleased on a stable version, and are only available in the `0.2.37` alpha versions.
+
+## [0.2.37-alpha.3] - 2024-08-30
+
+### Added
+
+- Multi-line (block) comments
+
+### Fixed
+
+- Single-line comments
+
+## [0.2.37-alpha.2] - 2024-08-27
+
+### Added
+
+- `--version` command to executable
 
 ## [0.2.37-alpha.1] - 2024-08-23
 
@@ -19,7 +36,9 @@ First release!
 - Semantic token highlighting through tree-sitter
 - Diagnostic reporting
 
-<!-- still haven't add a release to GitHub -->
+<!-- still haven't added a release to GitHub -->
+[0.2.37-alpha.3]: https://github.com/HigherOrderCO/bend-language-server/
+[0.2.37-alpha.2]: https://github.com/HigherOrderCO/bend-language-server/
 [0.2.37-alpha.1]: https://github.com/HigherOrderCO/bend-language-server/
 [Unreleased]: https://github.com/HigherOrderCO/bend-language-server/
 

@@ -8,7 +8,7 @@
         "name": "Launch Client",
         "runtimeExecutable": "${execPath}",
         "args": [
-          "--extensionDevelopmentPath=${workspaceRoot}"
+          "--extensionDevelopmentPath=${workspaceRoot}/editors/code"
         ],
         "outFiles": [
           "${workspaceRoot}/editors/code/out/**/*.js"
