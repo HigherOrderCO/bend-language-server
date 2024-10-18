@@ -135,9 +135,9 @@ dependencies = [
 
 [[package]]
 name = "bend-lang"
-version = "0.2.37-alpha.1"
+version = "0.2.37"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b9d13ca902cd0cc6af2290f3f031903257089760c96e29f442c3c45990a1805e"
+checksum = "d6da1f56cfece78d2bf35587675f925ebc14672b160af952abed52d34668574e"
 dependencies = [
  "TSPL",
  "clap",
@@ -152,7 +152,7 @@ dependencies = [
 
 [[package]]
 name = "bend-language-server"
-version = "0.2.37-alpha.4"
+version = "0.2.37"
 dependencies = [
  "anyhow",
  "bend-lang",
@@ -1021,9 +1021,9 @@ dependencies = [
 
 [[package]]
 name = "tree-sitter-bend"
-version = "0.2.37-alpha.3"
+version = "0.2.37"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d3e239401e04394ea924b686a8a5ab18eebe00f674b7a8901b6a5aed19a00a0c"
+checksum = "681baa666ba4448f3de953a94c3ef3593d9cf3684626bddeee665610feed61fc"
 dependencies = [
  "cc",
  "tree-sitter",

@@ -22,7 +22,7 @@ As of this alpha version, we still don't publish compiled releases of the langua
 On startup, the extension will ask you if you want it to automatically install the language server executable or if you want to set it up manually with the PATH environment variable. If you choose automatically, the extension will use `cargo` to install it to its local storage. If you want to install it manually, run the following command:
 
 ```
-cargo install bend-language-server --version 0.2.37-alpha.2
+cargo install bend-language-server --version 0.2.37
 ```
 
 Managing the language server manually will require you to update the language server yourself as new versions are published.
@@ -32,7 +32,7 @@ Managing the language server manually will require you to update the language se
 We are still not officially supporting other editors; however, if your editor of choice has support for the Language Server Protocol (LSP), you can try plugging it and our language server together. To install the LSP-compliant language server binary, use the Cargo command from the [Rust toolchain](https://rustup.rs):
 
 ```
-cargo install bend-language-server --version 0.2.37-alpha.2
+cargo install bend-language-server --version 0.2.37
 ```
 
 If the toolchain is correctly installed, `bend-language-server` should now be in your path.

@@ -9,7 +9,9 @@ and both this changelog and the crate's versioning scheme follow what the
 
 ## [Unreleased]
 
-All current features are yet unreleased on a stable version, and are only available in the `0.2.37` alpha versions.
+## [0.2.37] - 2024-10-18
+
+- First full release
 
 ## [0.2.37-alpha.4] - 2024-09-02
 
